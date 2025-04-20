@@ -14,6 +14,33 @@ export interface Agent {
     nationalite: string;
     adresse: string;
 }
+
+export interface Unite {
+    code: string;
+    designation: string;
+    categorie: string;
+    matieres: any[]; // Remplacez par le type approprié si nécessaire
+    _id: string;
+}
+
+export interface Promotion {
+    _id: string;
+    sectionId: string;
+    niveau: string;
+    mention: string;
+    orientation: string;
+    statut: string;
+    unites: Unite[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface PromotionResponse {
+    success: boolean;
+    count: number;
+    data: Promotion[];
+}
+
 export interface Appariteur {
     _id: string;
     agentId: {

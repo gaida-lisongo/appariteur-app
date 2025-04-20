@@ -112,7 +112,7 @@ export function UserInfo() {
             <SettingsIcon />
 
             <span className="mr-auto text-base font-medium">
-              Retraits
+              Configuration
             </span>
           </Link>
         </div>

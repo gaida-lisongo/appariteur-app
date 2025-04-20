@@ -1,105 +1,73 @@
 import * as Icons from "../icons";
+import useUserStore from "@/store/useUserStore";
 
-export const NAV_DATA = [
-  {
-    label: "MAIN MENU",
-    items: [
-      {
-        title: "Dashboard",
-        icon: Icons.HomeIcon,
-        items: [
-          {
-            title: "eCommerce",
-            url: "/",
-          },
-        ],
-      },
-      {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Icons.Calendar,
-        items: [],
-      },
-      {
-        title: "Profile",
-        url: "/profile",
-        icon: Icons.User,
-        items: [],
-      },
-      {
-        title: "Forms",
-        icon: Icons.Alphabet,
-        items: [
-          {
-            title: "Form Elements",
-            url: "/forms/form-elements",
-          },
-          {
-            title: "Form Layout",
-            url: "/forms/form-layout",
-          },
-        ],
-      },
-      {
-        title: "Tables",
-        url: "/tables",
-        icon: Icons.Table,
-        items: [
-          {
-            title: "Tables",
-            url: "/tables",
-          },
-        ],
-      },
-      {
-        title: "Pages",
-        icon: Icons.Alphabet,
-        items: [
-          {
-            title: "Settings",
-            url: "/pages/settings",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: "OTHERS",
-    items: [
-      {
-        title: "Charts",
-        icon: Icons.PieChart,
-        items: [
-          {
-            title: "Basic Chart",
-            url: "/charts/basic-chart",
-          },
-        ],
-      },
-      {
-        title: "UI Elements",
-        icon: Icons.FourCircle,
-        items: [
-          {
-            title: "Alerts",
-            url: "/ui-elements/alerts",
-          },
-          {
-            title: "Buttons",
-            url: "/ui-elements/buttons",
-          },
-        ],
-      },
-      {
-        title: "Authentication",
-        icon: Icons.Authentication,
-        items: [
-          {
-            title: "Sign In",
-            url: "/auth/sign-in",
-          },
-        ],
-      },
-    ],
-  },
-];
+const { promotions, activeAppariteur } = useUserStore.getState();
+console.log('promotions', promotions);
+
+interface MenuItem {
+  title: string;
+  icon: any;
+  items: never[];
+  url: string;
+}
+
+interface MenuSection {
+  label: string;
+  items: MenuItem[];
+}
+
+interface Promotion {
+  _id: string;
+  niveau: string;
+  mention: string;
+  orientation?: string;
+}
+
+interface AnneeId {
+  _id: string;
+}
+
+interface Appariteur {
+  anneeId: AnneeId;
+}
+
+const buildMenuItems = (): MenuSection[] => {
+  let navMenu: MenuSection[] = [
+    {
+      label: "",
+      items: [
+        {
+          title: "Dashboard",
+          icon: Icons.HomeIcon,
+          items: [],
+          url: "/",
+        }
+      ]
+    },
+    {
+      label: "ETUDIANTS",
+      items: promotions ? promotions.map((promotion: Promotion) => ({
+          title: `${promotion.niveau} ${promotion.mention} ${promotion.orientation ? `(${promotion.orientation})` : ""}`,
+          url: `/etudiants/${promotion._id}-${activeAppariteur?.anneeId._id}`,
+          icon: Icons.User,
+          items: []
+        })
+      ) : [],
+    },
+    {
+      label: "INSCRIPTIONS",
+      items: promotions ? promotions.map((promotion: Promotion) => ({
+          title: `${promotion.niveau} ${promotion.mention} ${promotion.orientation ? `(${promotion.orientation})` : ""}`,
+          url: `/inscriptions/${promotion._id}-${activeAppariteur?.anneeId._id}`,
+          icon: Icons.FourCircle,
+          items: []
+        })
+      ) : [],
+    }
+  ]
+
+  return navMenu;
+}
+
+
+export const NAV_DATA = buildMenuItems();

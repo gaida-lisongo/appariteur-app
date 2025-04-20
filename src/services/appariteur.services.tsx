@@ -1,4 +1,4 @@
-import { Appariteur, AppariteurResponse } from "@/types/api.types";
+import { Appariteur, AppariteurResponse, PromotionResponse } from "@/types/api.types";
 
 class AppariteurService {
     baseUrl: string;
@@ -75,6 +75,20 @@ class AppariteurService {
             }
         } catch (error) {
             console.error('Error verifying OTP:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async getPromotionsBySectionId(sectionId: string) : Promise<PromotionResponse> {
+        try {
+            const request = await fetch(`${this.baseUrl}/promotions/section/${sectionId}`);
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching promotions:', error);
             throw error; // Rethrow the error to be handled by the caller            
         }
     }

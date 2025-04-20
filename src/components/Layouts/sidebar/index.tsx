@@ -9,11 +9,13 @@ import { NAV_DATA } from "./data";
 import { ArrowLeftIcon, ChevronUp } from "./icons";
 import { MenuItem } from "./menu-item";
 import { useSidebarContext } from "./sidebar-context";
+import useUserStore from "@/store/useUserStore";
 
 export function Sidebar() {
   const pathname = usePathname();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const { fetchPromotions, activeAppariteur, promotion, setPromotion, promotions, agent } = useUserStore();
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
@@ -24,23 +26,16 @@ export function Sidebar() {
     // );
   };
 
-  useEffect(() => {
-    // Keep collapsible open, when it's subpage is active
-    NAV_DATA.some((section) => {
-      return section.items.some((item) => {
-        return item.items.some((subItem) => {
-          if (subItem.url === pathname) {
-            if (!expandedItems.includes(item.title)) {
-              toggleExpanded(item.title);
-            }
+  useEffect(()=>{
+    console.log('activeAppariteur in sidebar', agent);
+    const fetchMenuItems = async () => {
+      if (!activeAppariteur) return;
+      const response = await fetchPromotions(activeAppariteur?.sectionId._id)
+      console.log('response', response);
+    }
 
-            // Break the loop
-            return true;
-          }
-        });
-      });
-    });
-  }, [pathname]);
+    fetchMenuItems();
+  }, [promotion])
 
   return (
     <>
@@ -87,8 +82,8 @@ export function Sidebar() {
 
           {/* Navigation */}
           <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
-            {NAV_DATA.map((section) => (
-              <div key={section.label} className="mb-6">
+            {NAV_DATA.map((section, indx) => (
+              <div key={indx} className="mb-6">
                 <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
                   {section.label}
                 </h2>
@@ -122,32 +117,15 @@ export function Sidebar() {
                               />
                             </MenuItem>
 
-                            {expandedItems.includes(item.title) && (
-                              <ul
-                                className="ml-9 mr-0 space-y-1.5 pb-[15px] pr-0 pt-2"
-                                role="menu"
-                              >
-                                {item.items.map((subItem) => (
-                                  <li key={subItem.title} role="none">
-                                    <MenuItem
-                                      as="link"
-                                      href={subItem.url}
-                                      isActive={pathname === subItem.url}
-                                    >
-                                      <span>{subItem.title}</span>
-                                    </MenuItem>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
                           </div>
                         ) : (
                           (() => {
+                            if (!item.title) return null;
+
                             const href =
                               "url" in item
                                 ? item.url + ""
-                                : "/" +
-                                  item.title.toLowerCase().split(" ").join("-");
+                                : "/";
 
                             return (
                               <MenuItem

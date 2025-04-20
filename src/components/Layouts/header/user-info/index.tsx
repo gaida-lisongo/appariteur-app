@@ -9,18 +9,34 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogOutIcon, SettingsIcon, UserIcon } from "./icons";
+import useUserStore from "@/store/useUserStore";
 
 export function UserInfo() {
   const [isOpen, setIsOpen] = useState(false);
+  const { activeAppariteur, agent, clear } = useUserStore();
+ 
+  useEffect(() => {
+    console.log("activeAppariteur", activeAppariteur);
+    console.log("agent", agent);
+  }, [])
 
   const USER = {
-    name: "John Smith",
-    email: "johnson@nextadmin.com",
-    img: "/images/user/user-03.png",
+    name: agent?.nom || activeAppariteur?.agentId?.nom || "John Doe",
+    email: agent?.email || activeAppariteur?.agentId?.email || "",
+    img: agent?.avatar || activeAppariteur?.agentId?.avatar || "/images/avatar.png",
   };
 
+  const handleLogout = () => {
+    // Suppression du token dans le cookie
+    clear();
+    console.log("Suppression du cookie");
+    document.cookie = "user-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // Redirection vers la page de connexion
+    window.location.href = "/auth/apparitorat";
+    setIsOpen(false);
+  };
   return (
     <Dropdown isOpen={isOpen} setIsOpen={setIsOpen}>
       <DropdownTrigger className="rounded align-middle outline-none ring-primary ring-offset-2 focus-visible:ring-1 dark:ring-offset-gray-dark">
@@ -29,7 +45,7 @@ export function UserInfo() {
         <figure className="flex items-center gap-3">
           <Image
             src={USER.img}
-            className="size-12"
+            className="size-12 rounded-full object-cover"
             alt={`Avatar of ${USER.name}`}
             role="presentation"
             width={200}
@@ -59,7 +75,7 @@ export function UserInfo() {
         <figure className="flex items-center gap-2.5 px-5 py-3.5">
           <Image
             src={USER.img}
-            className="size-12"
+            className="size-12 rounded-full object-cover"
             alt={`Avatar for ${USER.name}`}
             role="presentation"
             width={200}
@@ -85,7 +101,7 @@ export function UserInfo() {
           >
             <UserIcon />
 
-            <span className="mr-auto text-base font-medium">View profile</span>
+            <span className="mr-auto text-base font-medium">Profile</span>
           </Link>
 
           <Link
@@ -96,7 +112,7 @@ export function UserInfo() {
             <SettingsIcon />
 
             <span className="mr-auto text-base font-medium">
-              Account Settings
+              Retraits
             </span>
           </Link>
         </div>
@@ -106,11 +122,11 @@ export function UserInfo() {
         <div className="p-2 text-base text-[#4B5563] dark:text-dark-6">
           <button
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
+            onClick={() => handleLogout()}
           >
             <LogOutIcon />
 
-            <span className="text-base font-medium">Log out</span>
+            <span className="text-base font-medium">Se deconnecter</span>
           </button>
         </div>
       </DropdownContent>

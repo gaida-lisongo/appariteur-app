@@ -49,7 +49,7 @@ export default function SignIn() {
   // Redirection si déjà connecté
   useEffect(() => {
     if (token) {
-      router.push("/dashboard");
+      router.push("/");
     }
   }, [token, router]);
 

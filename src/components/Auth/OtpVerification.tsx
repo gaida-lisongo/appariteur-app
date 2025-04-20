@@ -34,7 +34,7 @@ export default function OtpVerification({ appariteur, onClose }: OtpVerification
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          matricule: appariteur.matricule,
+          matricule: appariteur.agentId.matricule,
           otp 
         }),
       });
@@ -89,8 +89,8 @@ export default function OtpVerification({ appariteur, onClose }: OtpVerification
         </h3>
         
         <p className="mb-6 text-sm text-body-color">
-          Bonjour <span className="font-bold">{appariteur.prenom} {appariteur.nom}</span>, 
-          <br />Un code de vérification a été envoyé à l'adresse {appariteur.email.replace(/^(.{3})(.*)(@.*)$/, "$1***$3")}.
+          Bonjour <span className="font-bold">{appariteur.agentId.prenom} {appariteur.agentId.nom}</span>, 
+          <br />Un code de vérification a été envoyé à l'adresse {appariteur.agentId.email.replace(/^(.{3})(.*)(@.*)$/, "$1***$3")}.
           <br />Veuillez entrer ce code ci-dessous.
         </p>
         

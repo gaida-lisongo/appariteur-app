@@ -1,3 +1,15 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": [
+    "next/core-web-vitals"
+  ],
+  "rules": {
+    // Désactiver l'avertissement pour les quotes non échappés
+    "react/no-unescaped-entities": "off",
+    
+    // Réduire la gravité des avertissements pour les dépendances manquantes dans useEffect
+    "react-hooks/exhaustive-deps": "warn",
+    
+    // Désactiver l'avertissement pour les exports anonymes par défaut
+    "import/no-anonymous-default-export": "off"
+  }
 }

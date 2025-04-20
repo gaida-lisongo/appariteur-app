@@ -1,25 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import services from "@/services";
 import { Appariteur } from "@/types/api.types";
-import OtpVerification from "@/components/Auth/OtpVerification";
 import AppariteurCard from "@/components/appariteur/AppariteurCard";
+import useUserStore from "@/store/useUserStore";
 import { inbtp, logo } from "@/assets/logo";
-import { gt1 } from '@/assets/banner';
+import { gt1 } from "@/assets/banner"
 
-export default function ForgotMatricule() {
+export default function ApparitoratSelection() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [appariteurs, setAppariteurs] = useState<Appariteur[]>([]);
   const [filteredAppariteurs, setFilteredAppariteurs] = useState<Appariteur[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAppariteur, setSelectedAppariteur] = useState<Appariteur | null>(null);
-  const [showOtpModal, setShowOtpModal] = useState(false);
+  const { setActiveAppariteur } = useUserStore();
   const { Appariteur } = services;
 
   useEffect(() => {
@@ -68,35 +67,15 @@ export default function ForgotMatricule() {
 
   const handleAppariteurSelect = async (appariteur: Appariteur) => {
     try {
-      // Appel à l'API pour générer et envoyer l'OTP
-      const otpResponse = await fetch(`/api/auth/generate-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          matricule: appariteur.agentId.matricule,
-          email: appariteur.agentId.email 
-        }),
-      });
+      // Stocker l'appariteur sélectionné dans le store
+      setActiveAppariteur(appariteur);
       
-      const otpData = await otpResponse.json();
-      
-      if (otpResponse.ok) {
-        setSelectedAppariteur(appariteur);
-        setShowOtpModal(true);
-      } else {
-        setError(otpData.message || "Erreur lors de la génération de l'OTP");
-      }
+      // Rediriger vers la page de connexion pour entrer l'OTP
+      router.push('/sign-in');
     } catch (err) {
-      console.error("Erreur:", err);
+      console.error("Erreur lors de la sélection de l'appariteur:", err);
       setError("Une erreur est survenue. Veuillez réessayer.");
     }
-  };
-
-  const closeOtpModal = () => {
-    setShowOtpModal(false);
-    setSelectedAppariteur(null);
   };
 
   return (
@@ -114,7 +93,7 @@ export default function ForgotMatricule() {
               />
               <Image
                 className="dark:hidden"
-                src={logo}
+                src={inbtp}
                 alt="Logo"
                 width={176}
                 height={32}
@@ -122,7 +101,7 @@ export default function ForgotMatricule() {
             </Link>
             
             <p className="2xl:px-20">
-              Trouvez votre compte d'appariteur et connectez-vous à votre espace de travail
+              Sélectionnez votre compte d'appariteur pour accéder à votre espace de travail
             </p>
 
             <span className="mt-15 inline-block">
@@ -139,7 +118,7 @@ export default function ForgotMatricule() {
         <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l">
           <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
             <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-              Recherche de matricule
+              Sélection d'apparitorat
             </h2>
 
             {error && (
@@ -180,7 +159,7 @@ export default function ForgotMatricule() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher par nom, prénom, matricule, département, filière..."
+                  placeholder="Recherchez par nom, matricule, année, section..."
                   className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 />
                 <span className="absolute right-4 top-4">
@@ -230,23 +209,9 @@ export default function ForgotMatricule() {
                 </div>
               )}
             </div>
-
-            <div className="mt-6 text-center">
-              <p>
-                Retour à la{" "}
-                <Link href="/auth/sign-in" className="text-primary">
-                  connexion
-                </Link>
-              </p>
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Modal OTP */}
-      {showOtpModal && selectedAppariteur && (
-        <OtpVerification appariteur={selectedAppariteur} onClose={closeOtpModal} />
-      )}
     </div>
   );
 }

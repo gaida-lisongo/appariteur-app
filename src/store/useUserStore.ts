@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { Appariteur } from '@/types/api.types'
-import { Agent } from 'http'
+import { Agent } from '@/types/api.types'
 
 interface UserState {
   token: string | null

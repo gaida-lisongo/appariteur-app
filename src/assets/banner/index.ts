@@ -1,0 +1,17 @@
+export { default as inbtp1 } from './inbtp-1.jpeg';
+export { default as inbtp2 } from './inbtp-2.jpg';
+export { default as inbtp3 } from './inbtp-3.jpg';
+export { default as inbtp4 } from './inbtp-4.jpg';
+export { default as inbtp5 } from './inbtp-5.jpg';
+export { default as inbtp6 } from './inbtp-6.jpg';
+export { default as inbtp7 } from './inbtp-7.jpeg';
+export { default as inbtp8 } from './inbtp-8.jpeg';
+export { default as inbtp9 } from './inbtp-9.jpeg';
+export { default as inbtp10 } from './inbtp-10.jpeg';
+export { default as enseignant1 } from './enseignant-1.jpeg';
+export { default as enseignant2 } from './enseignant-2.png';
+export { default as ingenieur1 } from './ingenieur-1.jpg';
+export { default as ingenieur2 } from './ingenieur-2.jpg';
+export { default as ingenieur3 } from './ingenieur-3.jpg';
+export { default as gt1 } from './gt-1.jpg';
+export { default as gt2 } from './gt-2.jpg';

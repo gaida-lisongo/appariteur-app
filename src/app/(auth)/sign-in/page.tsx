@@ -5,17 +5,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useUserStore from "@/store/useUserStore";
-import { inbtp, logo } from "@/assets/logo";
+import { inbtp } from "@/assets/logo";
 import { gt1 } from "@/assets/banner";
+import services from "@/services";
 
 export default function SignIn() {
   const router = useRouter();
-  const { activeAppariteur, token, setToken } = useUserStore();
+  const { activeAppariteur, token, setToken, setAgent, makeTokenToCookie } = useUserStore();
   const [matricule, setMatricule] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const { Appariteur } = services;
   // Si activeAppariteur existe, pré-remplir le champ matricule
   useEffect(() => {
     if (activeAppariteur?.agentId?.matricule) {
@@ -25,6 +26,23 @@ export default function SignIn() {
     // Si activeAppariteur n'existe pas, rediriger vers la page de sélection d'appariteur
     if (!activeAppariteur) {
       router.push("/apparitorat");
+    } else {
+      console.log("Appariteur actif:", activeAppariteur);
+      const getOTP = async () => {
+        try {
+          const response = await Appariteur.generateOtp(activeAppariteur);
+
+          console.log("Réponse de la génération de l'OTP:", response);
+          
+        } catch (error) {
+          console.error("Erreur lors de la récupération de l'OTP:", error);
+          setError("Une erreur est survenue lors de la récupération de l'OTP.");
+          
+        }
+
+      }
+
+      getOTP();
     }
   }, [activeAppariteur]);
 
@@ -52,57 +70,22 @@ export default function SignIn() {
     try {
       setIsLoading(true);
 
-      // Si pas d'appariteur sélectionné et qu'on n'a que le matricule,
-      // commencer par générer un OTP
-      if (!activeAppariteur) {
-        const otpResponse = await fetch(`/api/auth/generate-otp`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ matricule }),
-        });
-
-        if (!otpResponse.ok) {
-          const otpData = await otpResponse.json();
-          setError(otpData.message || "Erreur lors de la génération de l'OTP");
-          return;
-        }
+      if (!activeAppariteur?.agentId?._id) {
+        throw new Error("ID de l'appariteur non défini");
       }
+      
+      const resp = await Appariteur.verifyOtp(activeAppariteur.agentId._id, otp);
 
-      // Vérifier l'OTP
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ matricule, otp }),
-      });
+      const { data } = resp;
 
-      const data = await response.json();
-
-      if (response.ok && data.token) {
+      if (data.success && data.token) {
         // Stocker le token dans le store
         setToken(data.token);
-
-        // Si on n'a pas d'appariteur actif, le récupérer
-        if (!activeAppariteur) {
-          const appariteurResponse = await fetch(`/api/appariteurs/search?matricule=${matricule}`, {
-            headers: {
-              Authorization: `Bearer ${data.token}`,
-            },
-          });
-
-          if (appariteurResponse.ok) {
-            const appariteurData = await appariteurResponse.json();
-            if (appariteurData.appariteur) {
-              useUserStore.getState().setActiveAppariteur(appariteurData.appariteur);
-            }
-          }
-        }
+        setAgent(data.agent);
+        makeTokenToCookie(data.token);
 
         // Rediriger vers le tableau de bord
-        router.push("/dashboard");
+        router.push("/");
       } else {
         setError(data.message || "Échec de l'authentification. Veuillez vérifier vos identifiants.");
       }

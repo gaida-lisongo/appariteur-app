@@ -1,3 +1,19 @@
+
+export interface Agent {
+    id: string;
+    nom: string;
+    prenom: string;
+    postnom: string;
+    email: string;
+    typeAgent: string;
+    avatar: string;
+    telephone: string;
+    matricule: string;
+    dateNaissance: string;
+    lieuNaissance: string;
+    nationalite: string;
+    adresse: string;
+}
 export interface Appariteur {
     _id: string;
     agentId: {

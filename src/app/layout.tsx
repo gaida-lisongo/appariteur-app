@@ -1,5 +1,6 @@
 import "@/css/satoshi.css";
 import "@/css/style.css";
+import { favicon, logo } from "@/assets/logo";
 
 import { Sidebar } from "@/components/Layouts/sidebar";
 
@@ -14,11 +15,17 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | NextAdmin - Next.js Dashboard Kit",
-    default: "NextAdmin - Next.js Dashboard Kit",
+    template: "%s | Plateforme d'Appariteur",
+    default: "Appartiteur",
   },
   description:
-    "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.",
+    "Cette plateforme vous permet de vous connecter à votre compte et d'accéder à toutes les fonctionnalités de l'appariteur.",
+  icons: {
+    // Ces chemins doivent pointer vers des fichiers dans le dossier public
+    icon: favicon.src,
+    shortcut: logo.src,
+    apple: logo.src,
+  },
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

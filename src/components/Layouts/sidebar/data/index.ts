@@ -2,7 +2,6 @@ import * as Icons from "../icons";
 import useUserStore from "@/store/useUserStore";
 
 const { promotions, activeAppariteur } = useUserStore.getState();
-console.log('promotions', promotions);
 
 interface MenuItem {
   title: string;

@@ -1,23 +1,31 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { Appariteur, Promotion, PromotionResponse } from '@/types/api.types'
+import { Appariteur, Inscrits, Minerval, Promotion, PromotionResponse } from '@/types/api.types'
 import { Agent } from '@/types/api.types'
 import services from '@/services'
+import { act } from 'react'
 
 const { Appariteur: AppariteurService } = services
-
 interface UserState {
   token: string | null
   activeAppariteur: Appariteur | null
   agent: Agent | null
   promotions: Promotion[] | null
   promotion: Promotion | null
+  etudiants: Inscrits[] | null
+  minervals: Minerval[] | null
+  isLoading: boolean
+  setLoading: (isLoading: boolean) => void
   setPromotion: (promotion: Promotion) => void
   setAgent: (agent: Agent) => void
   setToken: (token: string) => void
+  setEtudiants: (etudiants: Inscrits[]) => void
+  setMinervals: (minervals: Minerval[]) => void
+  fetchMinervals: (promotionId: string) => Promise<Minerval[]>
+  fetchEtudiants: (promotionId: string) => Promise<Inscrits[]>
   makeTokenToCookie: (token: string) => void
   setActiveAppariteur: (appariteur: Appariteur) => void
-  fetchPromotions: (sectionId: string) => Promise<PromotionResponse>
+  fetchPromotions: (sectionId: string) => Promise<PromotionResponse | null>
   clearToken: () => void
   clearActiveAppariteur: () => void
   clear: () => void
@@ -31,6 +39,77 @@ const useUserStore = create<UserState>()(
       agent: null,
       promotions: null,
       promotion: null,
+      etudiants: null,
+      minervals: null,
+      isLoading: false,
+      setLoading: (isLoading) => set({ isLoading }),
+      setEtudiants: (etudiants) => set({ etudiants }),
+      setMinervals: (minervals) => set({ minervals }),
+      fetchMinervals: async (promotionId) => {
+            const response = await AppariteurService.getMinervalByPromotionId(promotionId)
+            set({ isLoading: true })
+            if (response.success) {
+                const { data } = response;
+                // get anneeId of activeAppariteur
+                const activeAppariteur = useUserStore.getState().activeAppariteur
+                const anneeId = activeAppariteur?.anneeId._id
+                const currentMinervals = data.filter((item) => item.anneeId._id === anneeId)
+                
+                if (currentMinervals.length === 0) {
+                    set({ isLoading: false })
+                    return []
+                }
+                
+                // set the minervals in the store
+                set(
+                    (state) => {
+                        const existingMinervals = state.minervals || []
+                        const updatedMinervals = existingMinervals.filter((item) => item?._id !== promotionId)
+                        return { minervals: [...updatedMinervals, ...data] }
+                    }
+                )
+                set({ isLoading: false })
+                return data
+            } else {
+                set({ isLoading: false })
+                return []
+            }
+      },
+      fetchEtudiants: async (promotionId) => {
+        const response = await AppariteurService.getEtudiantsByPromotionId(promotionId)
+        set({ isLoading: true })
+        if (response.success) {
+            const { data } = response;
+            let inscrits = {
+                promotionId: promotionId,
+                inscrits: data.map((etudiant) => ({
+                    _id: etudiant._id,
+                    nom: etudiant.infoPerso.nom,
+                    prenom: etudiant.infoPerso.preNom,
+                    email: etudiant.infoSec.email,
+                    matricule: etudiant.infoSec.telephone,
+                    sexe: etudiant.infoPerso.sexe,
+                    dateNaissance: etudiant.infoPerso.dateNaissance,
+                    section: etudiant.infoScol.section,
+                    option: etudiant.infoScol.option,
+                    pourcentage: etudiant.infoScol.pourcentage,
+                    optId: etudiant.infoSec.optId,
+                }))
+            }   
+
+            set((state) => {
+                const existingEtudiants = state.etudiants || []
+                const updatedEtudiants = existingEtudiants.filter((item) => item.promotionId !== promotionId)
+                return { etudiants: [...updatedEtudiants, inscrits] }
+            })
+
+            set({ isLoading: false })
+            return [inscrits]
+        } else {
+          set({ isLoading: false })
+          return []
+        }
+      },
       setPromotion: (promotion) => set({ promotion }),
       setAgent: (agent) => set({ agent }),
       setToken: (token) => set({ token }),
@@ -45,7 +124,7 @@ const useUserStore = create<UserState>()(
         if (response) {
           const { data } = response
           set({ promotions: data })
-          
+
           return response
         } else {
           throw new Error('Failed to fetch promotions')

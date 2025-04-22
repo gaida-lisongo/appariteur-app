@@ -26,7 +26,7 @@ export async function UsedDevices({
           Used Devices
         </h2>
 
-        <PeriodPicker defaultValue={timeFrame} sectionKey="used_devices" />
+        <PeriodPicker defaultValue={timeFrame} sectionKey="used_devices" items={["L1 BTP", "L2 BTP", "L3 BTP"]}/>
       </div>
 
       <div className="grid place-items-center">

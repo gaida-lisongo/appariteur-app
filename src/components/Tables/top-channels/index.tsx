@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -22,7 +23,7 @@ export async function TopChannels({ className }: { className?: string }) {
       )}
     >
       <h2 className="mb-4 text-body-2xlg font-bold text-dark dark:text-white">
-        Top Channels
+        Frais académique
       </h2>
 
       <Table>

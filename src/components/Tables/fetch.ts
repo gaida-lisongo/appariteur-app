@@ -1,4 +1,8 @@
 import * as logos from "@/assets/logos";
+import useUserStore from "@/store/useUserStore";
+
+const { minervals } = useUserStore.getState();
+console.log("minervals", minervals);
 
 export async function getTopProducts() {
   // Fake delay
@@ -74,7 +78,6 @@ export async function getInvoiceTableData() {
 
 export async function getTopChannels() {
   // Fake delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   return [
     {

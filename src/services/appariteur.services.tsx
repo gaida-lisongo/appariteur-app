@@ -1,4 +1,4 @@
-import { Appariteur, AppariteurResponse, PromotionResponse } from "@/types/api.types";
+import { Appariteur, AppariteurResponse, EtudiantResponse, MinervalResponse, PromotionResponse } from "@/types/api.types";
 
 class AppariteurService {
     baseUrl: string;
@@ -92,6 +92,114 @@ class AppariteurService {
             throw error; // Rethrow the error to be handled by the caller            
         }
     }
+
+    async getAllPromotions() : Promise<PromotionResponse> {
+        try {
+            const request = await fetch(`${this.baseUrl}/promotions`);
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching promotions:', error);
+            throw error; // Rethrow the error to be handled by the caller
+        }
+    }
+
+    async getEtudiantsByPromotionId(promotionId: string) : Promise<EtudiantResponse> {
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants/find`,
+                {
+                    method: 'POST',
+                    headers: this.headers,
+                    body: JSON.stringify({
+                        promotionId
+                    })
+                }
+            );
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching etudiants:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async getAllEtudiants() : Promise<EtudiantResponse> {
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants/find`,
+                {
+                    method: 'POST',
+                    headers: this.headers
+                }
+            );
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching etudiants:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async getMinervalByPromotionId(promotionId: string) : Promise<MinervalResponse> {
+        try {
+            const request = await fetch(`${this.baseUrl}/minervals/promotion/${promotionId}`);
+            
+            // if (!request.ok) {
+            //     throw new Error(`HTTP error! status: ${request.status}`);
+            // }
+            const response = await request.json();
+            console.log('Minerval response:', response);
+            return response;
+        } catch (error) {
+            console.error('Error fetching minerval:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async createTranche({id, data}: {id: string, data: {designation: string, montant: number, date_fin: Date}}) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/minervals/${id}/tranches`, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify(data)
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error creating tranche:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async deleteTranche({id, trancheId}: {id: string, trancheId: string}) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/minervals/${id}/tranches/${trancheId}`, {
+                method: 'DELETE',
+                headers: this.headers
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error deleting tranche:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    // sync updateMinerval({id, data}: {id: string, data: {montant: number, devise: string, }}) : Promise<any> {
 }
 
 export default AppariteurService

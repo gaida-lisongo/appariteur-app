@@ -3,6 +3,7 @@
 import { compactFormat } from "@/lib/format-number";
 import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
+import useUserStore from "@/store/useUserStore";
 
 type PropsType = {
   data: { name: string; amount: number }[];
@@ -13,6 +14,8 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 });
 
 export function DonutChart({ data }: PropsType) {
+  const { etudiants } = useUserStore();
+  console.log("fetch all etudiants : ", etudiants);
   const chartOptions: ApexOptions = {
     chart: {
       type: "donut",

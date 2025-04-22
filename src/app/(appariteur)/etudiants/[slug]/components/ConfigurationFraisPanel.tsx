@@ -188,7 +188,7 @@ const ConfigurationFraisPanel = ({
           <div>
             <span className="text-sm font-medium">Total configuré: </span>
             <span className="font-bold">
-              {minervals.tranches.reduce((acc, tranche) => acc + (tranche.montant || 0), 0)} {minervals.devise}
+              {/* {minervals.tranches.reduce((acc, tranche) => acc + (tranche.montant || 0), 0)} {minervals.devise} */}
             </span>
           </div>
           

@@ -28,12 +28,10 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (etudiants) {
       etudiants.forEach((etudiant) => {
-        console.log("Etudiant:", etudiant.inscrits);
         const allInscrits = etudiant.inscrits.map((inscrit: any) => {
-          console.log("Inscrit:", inscrit);
           return inscrit;
         })
-        console.log("All Inscrits:", allInscrits);
+        
         setInscrits(allInscrits);
       })
       // const allInscrits = etudiants.reduce((acc: Inscrits[], current: any) => {

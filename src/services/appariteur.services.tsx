@@ -164,6 +164,33 @@ class AppariteurService {
         }
     }
 
+    async createMinerval({promotionId, anneeId, montant, devise = "CDF", tranches=[]}: {promotionId: string, anneeId: string, montant: number, devise?: string, tranches?: Array<{designation: string, montant: number, date_fin: Date}>}) : Promise<any> {
+        
+        try {
+            const request = await fetch(`${this.baseUrl}/minervals`, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify({
+                    promotionId,
+                    anneeId,
+                    montant,
+                    devise,
+                    tranches
+                })
+            });
+
+            console.log('Create minerval request:', request.ok)
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error creating minerval:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
     async createTranche({id, data}: {id: string, data: {designation: string, montant: number, date_fin: Date}}) : Promise<any> {
         try {
             const request = await fetch(`${this.baseUrl}/minervals/${id}/tranches`, {

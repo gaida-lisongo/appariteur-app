@@ -9,7 +9,7 @@ import { inbtp6 } from "@/assets/banner";
 import PromotionBanner from "./components/PromotionBanner";
 import ConfigurationFraisPanel from "./components/ConfigurationFraisPanel";
 import TrancheModal, { TrancheInitiale, TrancheFormData } from "./components/TrancheModal";
-import CreateFraisModal from "./components/CreateFraisModal";
+import CreateMinervalPanel from "./components/CreateMinervalPanel";
 import services from "@/services";
 
 const PromotionPage = () => {
@@ -46,12 +46,12 @@ const PromotionPage = () => {
 
   const currentMinerval = async (promotionId: string) => {
     const response = await fetchMinervals(promotionId);
-    console.log("Current minerval:", response);
-
     if (response && response.success) {
-      setMinervals(response.data);
+      console.log("Minerval de la promotion:", response.data[0]);
+      setMinervals(response?.data);
     }
   }
+
   useEffect(() => {
     setLoading(true);
     if (slug) {
@@ -59,9 +59,11 @@ const PromotionPage = () => {
       setPromotionId(currentPromotion);
       setAnneeId(currentAnnee);
       setLoading(false);
-
+      
       currentMinerval(currentPromotion);
     }
+
+    return setMinervals([]); // Nettoyage de l'état des minervals
   }, []);
 
   // Récupérer les infos de la promotion
@@ -88,8 +90,7 @@ const PromotionPage = () => {
           // Si des frais existent déjà, les charger
           if (selectedPromotion) {
             const allFraisAcademique = await fetchMinervals(selectedPromotion._id);
-            console.log("Frais académiques de la promotion:", allFraisAcademique);
-            setFraisAcad(allFraisAcademique);
+            setFraisAcad(allFraisAcademique[0]);
           }
         }
       } catch (error) {
@@ -106,21 +107,22 @@ const PromotionPage = () => {
 
   useEffect(() => {
     console.log("Frais académiques:", fraisAcad);
+
     if (fraisAcad && fraisAcad.length > 0) {
       setFraisConfig(prev => ({
         ...prev,
-        anneeAcad: fraisAcad[0].anneeId.slogan || "",
-        montantTotal: fraisAcad[0].montant || 0,
-        devise: fraisAcad[0].devise || "USD",
-        nombreTranches: fraisAcad[0].tranches?.length || 1,
-        tranches: fraisAcad[0].tranches || [{
+        anneeAcad: fraisAcad.anneeId.slogan || "",
+        montantTotal: fraisAcad.montant || 0,
+        devise: fraisAcad.devise || "USD",
+        nombreTranches: fraisAcad.tranches?.length || 1,
+        tranches: fraisAcad.tranches || [{
           designation: "Tranche 1",
           montant: 0,
           date_fin: new Date().toISOString().split('T')[0]
         }]
       }));
     }
-  }, [fraisAcad]);
+  }, [fraisAcad, minervals]);
 
   // Mise à jour du nombre de tranches
   useEffect(() => {
@@ -252,11 +254,6 @@ const PromotionPage = () => {
 
   // Pour supprimer une tranche
   const supprimerTranche = async (payload : {id: string, trancheId: string}) => {
-    if (minervals.tranches.length <= 1) {
-      alert("Il doit y avoir au moins une tranche!");
-      return;
-    }
-
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette tranche ?")) {
       try {
         // Mise à jour du state local
@@ -266,7 +263,7 @@ const PromotionPage = () => {
 
           console.log("Tranche supprimée avec succès:", request.data);
           alert("Tranche supprimée avec succès!");
-          setMinervals(request.data);
+          setMinervals([request.data]);
         }
         
       } catch (error) {
@@ -324,54 +321,59 @@ const PromotionPage = () => {
   const handleCreateFrais = async (fraisData: any) => {
     try {
       console.log("Création des frais académiques:", fraisData);
-      
+      setMinervals([fraisData]);
+      setFraisAcad(fraisData);
+      setCreateFraisModalIsOpen(false);
+
+      // Rechargerment de la page
+      window.location.reload();
       // Préparation des données pour l'API
-      const minervalData = {
-        promotionId: promotion._id,
-        anneeId: anneeId,
-        montant: fraisData.montant,
-        devise: fraisData.devise,
-        // Ajoutez d'autres champs nécessaires à votre API
-      };
+      // const minervalData = {
+      //   promotionId: promotion._id,
+      //   anneeId: anneeId,
+      //   montant: fraisData.montant,
+      //   devise: fraisData.devise,
+      //   // Ajoutez d'autres champs nécessaires à votre API
+      // };
       
       // Appel à l'API - décommentez quand vous êtes prêt à l'utiliser
       // const response = await Appariteur.createMinerval(minervalData);
       // const newMinerval = response.data;
       
-      // Simuler une réponse réussie pour l'instant
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // // Simuler une réponse réussie pour l'instant
+      // await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Créer un objet minerval avec une seule tranche initiale
-      const newMinerval = {
-        _id: `minerval-${Date.now()}`,
-        promotionId: promotion._id,
-        anneeId: anneeId,
-        montant: fraisData.montant,
-        devise: fraisData.devise,
-        tranches: [{
-          _id: `tranche-${Date.now()}`,
-          designation: "Tranche 1",
-          montant: fraisData.montant,
-          date_fin: new Date().toISOString().split('T')[0]
-        }]
-      };
+      // // Créer un objet minerval avec une seule tranche initiale
+      // const newMinerval = {
+      //   _id: `minerval-${Date.now()}`,
+      //   promotionId: promotion._id,
+      //   anneeId: anneeId,
+      //   montant: fraisData.montant,
+      //   devise: fraisData.devise,
+      //   tranches: [{
+      //     _id: `tranche-${Date.now()}`,
+      //     designation: "Tranche 1",
+      //     montant: fraisData.montant,
+      //     date_fin: new Date().toISOString().split('T')[0]
+      //   }]
+      // };
       
-      // Mise à jour du state global
-      setMinervals(newMinerval);
-      setCreateFraisModalIsOpen(false);
+      // // Mise à jour du state global
+      // setMinervals(newMinerval);
+      // setCreateFraisModalIsOpen(false);
       
-      // Afficher le panneau de configuration
-      setShowFinancePanel(true);
+      // // Afficher le panneau de configuration
+      // setShowFinancePanel(true);
       
-      // Mettre à jour fraisConfig pour refléter le nouveau minerval
-      setFraisConfig({
-        _id: newMinerval._id,
-        anneeAcad: anneeId || "",
-        montantTotal: newMinerval.montant,
-        devise: newMinerval.devise,
-        nombreTranches: 1,
-        tranches: newMinerval.tranches
-      });
+      // // Mettre à jour fraisConfig pour refléter le nouveau minerval
+      // setFraisConfig({
+      //   _id: newMinerval._id,
+      //   anneeAcad: anneeId || "",
+      //   montantTotal: newMinerval.montant,
+      //   devise: newMinerval.devise,
+      //   nombreTranches: 1,
+      //   tranches: newMinerval.tranches
+      // });
       
     } catch (error) {
       console.error("Erreur lors de la création des frais académiques:", error);
@@ -407,29 +409,37 @@ const PromotionPage = () => {
           backgroundImage={inbtp6}
           showFinancePanel={showFinancePanel}
           setShowFinancePanel={(show) => {
-            // Si on ouvre le panneau et qu'il n'y a pas de minerval, on ouvre la modale
-            if (show && (!minervals || !minervals._id)) {
-              setCreateFraisModalIsOpen(true);
-            } else {
-              setShowFinancePanel(show);
-            }
+            setShowFinancePanel(show);
           }}
         />
 
-        {/* Panneau de configuration des frais académiques - uniquement si minervals existe */}
-        {showFinancePanel && minervals && minervals._id && (
-          <ConfigurationFraisPanel
-            fraisConfig={fraisConfig}
-            setFraisConfig={setFraisConfig}
-            ouvrirModalAjoutTranche={ouvrirModalAjoutTranche}
-            ouvrirModalEditionTranche={ouvrirModalEditionTranche}
-            supprimerTranche={supprimerTranche}
-            distribuerMontantEgal={distribuerMontantEgal}
-            saveFraisAcademiques={saveFraisAcademiques}
-            setShowFinancePanel={setShowFinancePanel}
-            promotion={promotion}
-            minervals={minervals}
-          />
+        {/* Panneau de création ou configuration des frais académiques */}
+        {showFinancePanel && (
+          <>
+            {fraisAcad && fraisAcad._id ? (
+              // Si un minerval existe déjà, afficher le panneau de configuration
+              <ConfigurationFraisPanel
+                fraisConfig={fraisConfig}
+                setFraisConfig={setFraisConfig}
+                ouvrirModalAjoutTranche={ouvrirModalAjoutTranche}
+                ouvrirModalEditionTranche={ouvrirModalEditionTranche}
+                supprimerTranche={supprimerTranche}
+                distribuerMontantEgal={distribuerMontantEgal}
+                saveFraisAcademiques={saveFraisAcademiques}
+                setShowFinancePanel={setShowFinancePanel}
+                promotion={promotion}
+                minervals={fraisAcad}
+              />
+            ) : (
+              // Si aucun minerval n'existe, afficher le panneau de création
+              <CreateMinervalPanel
+                promotion={promotion}
+                anneeId={anneeId}
+                onCreateMinerval={handleCreateFrais}
+                setShowFinancePanel={setShowFinancePanel}
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -452,14 +462,6 @@ const PromotionPage = () => {
         trancheInitiale={trancheEnEdition || undefined}
         devise={minervals?.devise || "USD"}
         minervalId={minervals?._id}
-      />
-      
-      {/* Modal pour créer les frais académiques */}
-      <CreateFraisModal
-        isOpen={createFraisModalIsOpen}
-        onClose={() => setCreateFraisModalIsOpen(false)}
-        onSave={handleCreateFrais}
-        promotion={promotion}
       />
     </>
   );

@@ -182,74 +182,78 @@ const PromotionPage = () => {
 
   // Pour sauvegarder une tranche
   const sauvegarderTranche = async (trancheData: TrancheFormData) => {
-    try {
-      setTrancheError(null);
-      console.log("Données de la tranche à sauvegarder:", trancheData);
+    console.log("Données de la tranche à sauvegarder:", trancheData);
+
+    setMinervals([trancheData]);
+    setFraisAcad(trancheData);
+    // try {
+    //   setTrancheError(null);
+    //   console.log("Données de la tranche à sauvegarder:", trancheData);
       
-      // Préparation des données pour l'API
-      const payload = {
-        id: minervals._id,
-        tranche: {
-          ...trancheData,
-          _id: trancheEnEdition?._id || "" // Utilisez l'ID existant en cas de modification
-        }
-      };
+    //   // Préparation des données pour l'API
+    //   const payload = {
+    //     id: minervals._id,
+    //     tranche: {
+    //       ...trancheData,
+    //       _id: trancheEnEdition?._id || "" // Utilisez l'ID existant en cas de modification
+    //     }
+    //   };
       
-      let updatedMinerval;
+    //   let updatedMinerval;
       
-      // Si c'est une édition
-      if (trancheEnEdition && trancheEnEdition.index !== undefined) {
-        // Appel API - décommentez quand vous êtes prêt
-        // const response = await Appariteur.updateTranche(payload);
-        // updatedMinerval = response.data;
+    //   // Si c'est une édition
+    //   if (trancheEnEdition && trancheEnEdition.index !== undefined) {
+    //     // Appel API - décommentez quand vous êtes prêt
+    //     // const response = await Appariteur.updateTranche(payload);
+    //     // updatedMinerval = response.data;
         
-        // Pour le développement, simuler une mise à jour
-        const updatedTranches = [...minervals.tranches];
-        updatedTranches[trancheEnEdition.index] = {
-          ...updatedTranches[trancheEnEdition.index],
-          ...trancheData
-        };
+    //     // Pour le développement, simuler une mise à jour
+    //     const updatedTranches = [...minervals.tranches];
+    //     updatedTranches[trancheEnEdition.index] = {
+    //       ...updatedTranches[trancheEnEdition.index],
+    //       ...trancheData
+    //     };
         
-        updatedMinerval = {
-          ...minervals,
-          tranches: updatedTranches
-        };
-      } 
-      // Si c'est un ajout
-      else {
-        // Appel API - décommentez quand vous êtes prêt
-        // const response = await Appariteur.addTranche(payload);
-        // updatedMinerval = response.data;
+    //     updatedMinerval = {
+    //       ...minervals,
+    //       tranches: updatedTranches
+    //     };
+    //   } 
+    //   // Si c'est un ajout
+    //   else {
+    //     // Appel API - décommentez quand vous êtes prêt
+    //     // const response = await Appariteur.addTranche(payload);
+    //     // updatedMinerval = response.data;
         
-        // Pour le développement, simuler un ajout
-        updatedMinerval = {
-          ...minervals,
-          tranches: [
-            ...minervals.tranches,
-            {
-              _id: `tranche-${Date.now()}`,
-              ...trancheData
-            }
-          ]
-        };
-      }
+    //     // Pour le développement, simuler un ajout
+    //     updatedMinerval = {
+    //       ...minervals,
+    //       tranches: [
+    //         ...minervals.tranches,
+    //         {
+    //           _id: `tranche-${Date.now()}`,
+    //           ...trancheData
+    //         }
+    //       ]
+    //     };
+    //   }
       
-      // Mise à jour du state global
-      setMinervals(updatedMinerval);
+    //   // Mise à jour du state global
+    //   setMinervals(updatedMinerval);
       
-      // Mise à jour du state local fraisConfig
-      setFraisConfig(prev => ({
-        ...prev,
-        tranches: updatedMinerval.tranches,
-        nombreTranches: updatedMinerval.tranches.length
-      }));
+    //   // Mise à jour du state local fraisConfig
+    //   setFraisConfig(prev => ({
+    //     ...prev,
+    //     tranches: updatedMinerval.tranches,
+    //     nombreTranches: updatedMinerval.tranches.length
+    //   }));
       
-      // Fermer la modal
-      fermerModal();
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde de la tranche:", error);
-      setTrancheError("Une erreur est survenue lors de la sauvegarde de la tranche");
-    }
+    //   // Fermer la modal
+    //   fermerModal();
+    // } catch (error) {
+    //   console.error("Erreur lors de la sauvegarde de la tranche:", error);
+    //   setTrancheError("Une erreur est survenue lors de la sauvegarde de la tranche");
+    // }
   };
 
   // Pour supprimer une tranche
@@ -264,6 +268,8 @@ const PromotionPage = () => {
           console.log("Tranche supprimée avec succès:", request.data);
           alert("Tranche supprimée avec succès!");
           setMinervals([request.data]);
+
+          window.location.reload();
         }
         
       } catch (error) {
@@ -460,8 +466,8 @@ const PromotionPage = () => {
         onClose={fermerModal}
         onSave={sauvegarderTranche}
         trancheInitiale={trancheEnEdition || undefined}
-        devise={minervals?.devise || "USD"}
-        minervalId={minervals?._id}
+        devise={fraisAcad?.devise || "USD"}
+        minervalId={fraisAcad?._id}
       />
     </>
   );

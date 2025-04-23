@@ -45,10 +45,10 @@ const PromotionPage = () => {
   const [trancheError, setTrancheError] = useState<string | null>(null);
 
   const currentMinerval = async (promotionId: string) => {
-    const response = await fetchMinervals(promotionId);
-    if (response && response.success) {
-      console.log("Minerval de la promotion:", response.data[0]);
-      setMinervals(response?.data);
+    const minervals = await fetchMinervals(promotionId);
+    if (minervals && minervals.length > 0) {
+      console.log("Minerval de la promotion:", minervals[0]);
+      setMinervals(minervals);
     }
   }
 
@@ -86,10 +86,14 @@ const PromotionPage = () => {
             setEtudiants(etudiantsData[0].inscrits);
           }
           // Mettre à jour le nombre d'inscrits
-          setPromotion(prev => ({
-            ...prev,
-            nombreInscrits: etudiantsData[0]?.inscrits.length || 0
-          }));
+          interface Promotion {
+            _id: string;
+            niveau: string;
+            mention: string;
+            orientation?: string;
+            nombreInscrits?: number;
+            [key: string]: any; // for other potential properties
+          }
           // Si des frais existent déjà, les charger
           if (selectedPromotion) {
             const allFraisAcademique = await fetchMinervals(selectedPromotion._id);
@@ -183,9 +187,12 @@ const PromotionPage = () => {
 
   // Pour sauvegarder une tranche
   const sauvegarderTranche = async (trancheData: TrancheFormData) => {
-
-    setMinervals([trancheData]);
-    setFraisAcad(trancheData);
+    const updatedMinerval = {
+      ...fraisAcad,
+      ...trancheData
+    };
+    setMinervals([updatedMinerval]);
+    setFraisAcad(updatedMinerval);
   };
 
   // Pour supprimer une tranche
@@ -244,6 +251,7 @@ const PromotionPage = () => {
 
   const refreshEtudiants = async () => {
     try {
+      if (!promotionId) return;
       setLoading(true);
       const etudiantsData = await fetchEtudiants(promotionId);
       if (etudiantsData && etudiantsData.length > 0 && etudiantsData[0].inscrits) {
@@ -360,6 +368,7 @@ const PromotionPage = () => {
         trancheInitiale={trancheEnEdition || undefined}
         devise={fraisAcad?.devise || "USD"}
         minervalId={fraisAcad?._id}
+        minerval={fraisAcad}
       />
     </>
   );

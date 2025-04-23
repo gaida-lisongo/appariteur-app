@@ -279,7 +279,7 @@ export default function EtudiantPage() {
           ...etudiant.infoScol,
           section: schoolInfo.section,
           option: schoolInfo.option,
-          pourcentage: schoolInfo.pourcentage ? Number(schoolInfo.pourcentage) : undefined,
+          pourcentage: schoolInfo.pourcentage ? Number(schoolInfo.pourcentage) : 0,
         }
       };
       
@@ -349,15 +349,15 @@ export default function EtudiantPage() {
         actifs: {}
       };
       
-      // Créer l'objet de mise à jour
+      // Créer l'objet de mise à jour en préservant toutes les propriétés existantes
       const updateData = {
-        _id: etudiant._id,
+        ...etudiant,
         infoAcad: [...etudiant.infoAcad, newAcadEntry]
       };
-      
+      console.log("Update data: ", updateData);
+
       // Appeler la fonction de mise à jour
       const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
-      console.log("Response of updateEtudiant: ", response);
       
       // Réinitialiser le formulaire
       setNewAcadInfo({
@@ -404,10 +404,16 @@ export default function EtudiantPage() {
       const updatedInfoAcad = [...etudiant.infoAcad];
       updatedInfoAcad.splice(index, 1);
       
-      // Créer l'objet de mise à jour
+      // Créer l'objet de mise à jour en conservant toutes les propriétés de l'étudiant
       const updateData = {
+        ...etudiant,
         _id: etudiant._id,
-        infoAcad: updatedInfoAcad
+        infoPerso: etudiant.infoPerso,
+        infoSec: etudiant.infoSec,
+        infoScol: etudiant.infoScol,
+        infoAcad: updatedInfoAcad,
+        createdAt: etudiant.createdAt,
+        updatedAt: etudiant.updatedAt
       };
       
       // Appeler la fonction de mise à jour

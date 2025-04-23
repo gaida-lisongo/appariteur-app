@@ -37,8 +37,8 @@ type ImportedStudent = {
 
 export default function EtudiantsLayout({ children }: { children: React.ReactNode }) {
   const [formType, setFormType] = useState<"new" | "import" | null>(null);
-  const { etudiants, promotions, activeAppariteur, minervals, addMultipleEtudiants } = useUserStore();
-  const [inscrits, setInscrits] = useState<Inscrits[] | []>([]);
+  const { etudiants, promotions, activeAppariteur, minervals } = useUserStore();
+  const [inscrits, setInscrits] = useState<any[] | []>([]);
   const [stats, setStats] = useState<{
     total: number;
     hommes: number;

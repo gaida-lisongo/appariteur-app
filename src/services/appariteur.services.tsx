@@ -294,7 +294,7 @@ class AppariteurService {
         }
     }
 
-    async updateEtudiant({id, data}: {id: string, data: Etudiant}) : Promise<any> {
+    async updateEtudiant({id, data}: {id: string, data: any}) : Promise<any> {
         try {
             const request = await fetch(`${this.baseUrl}/etudiants/${id}`, {
                 method: 'PUT',

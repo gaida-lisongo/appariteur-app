@@ -6,7 +6,7 @@ import { User, Mail, Phone, Calendar, MapPin, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import useUserStore from "@/store/useUserStore";
-
+import { inbtp } from "@/assets/logo";
 export default function EtudiantLayout({
   children,
 }: {
@@ -55,17 +55,14 @@ export default function EtudiantLayout({
           <div className="flex flex-col md:flex-row items-center md:items-start gap-5">
             {/* Photo de profil */}
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-2 dark:bg-meta-4 flex items-center justify-center">
-              {etudiant.infoPerso.profile ? (
-                <Image 
-                  src={etudiant.infoPerso.profile} 
-                  alt={`${etudiant.infoPerso.nom} ${etudiant.infoPerso.postNom}`} 
-                  width={96} 
-                  height={96}
-                  className="object-cover"
-                />
-              ) : (
-                <User size={40} className="text-body-color dark:text-gray-400" />
-              )}
+              
+              <Image 
+                src={inbtp} 
+                alt={`${etudiant.infoPerso.nom} ${etudiant.infoPerso.postNom}`} 
+                width={96} 
+                height={96}
+                className="object-cover"
+              />
             </div>
 
             {/* Informations principales */}

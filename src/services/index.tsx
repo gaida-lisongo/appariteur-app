@@ -1,6 +1,6 @@
 import AppariteurService from "./appariteur.services";
 
-const API_URL = 'http://localhost:8080/api'; // Remplacez par l'URL de votre API
+const API_URL = 'https://back-etudiant-app-z1bz.onrender.com/api'; // Remplacez par l'URL de votre API
 
 export default {
     Appariteur : new AppariteurService(API_URL),

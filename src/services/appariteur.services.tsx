@@ -225,8 +225,43 @@ class AppariteurService {
             throw error; // Rethrow the error to be handled by the caller            
         }
     }
+    
+    async createEtudiant({data}: {data: any}) : Promise<any> {
+        console.log('Creating etudiant with data:', data);
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants`, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify(data)
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request?.message}`);
+            }
+            const response = await request.json();
+            
+            return response;
+        } catch (error) {
+            console.error('Error creating etudiant:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
 
-    // sync updateMinerval({id, data}: {id: string, data: {montant: number, devise: string, }}) : Promise<any> {
+    async deleteEtudiant({id}: {id: string}) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants/${id}`, {
+                method: 'DELETE',
+                headers: this.headers
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error deleting etudiant:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
 }
 
 export default AppariteurService

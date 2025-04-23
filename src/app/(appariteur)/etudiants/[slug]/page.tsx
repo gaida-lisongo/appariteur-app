@@ -296,8 +296,15 @@ const PromotionPage = () => {
   const handleDeleteEtudiant = async (id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")) {
       try {
-        alert("Étudiant supprimé avec succès!");
-        setEtudiants(prev => prev.filter(e => e._id !== id));
+        const response = await Appariteur.deleteEtudiant({ id });
+        if (response.success) {
+          alert(response.message);
+          setEtudiants(prev => prev.filter(e => e._id !== id));
+        } else {
+          console.error("Erreur lors de la suppression de l'étudiant:", response.message);
+          alert("Une erreur est survenue lors de la suppression de l'étudiant.");
+          return;
+        }
       } catch (error) {
         console.error("Erreur lors de la suppression:", error);
         alert("Une erreur est survenue lors de la suppression.");
@@ -450,13 +457,15 @@ const PromotionPage = () => {
       </div>
 
       {/* Tableau des étudiants */}
-      <div className="space-y-10">
+      <div className="space-y-12">
         <EtudiantsTable
           etudiants={etudiants}
           promotionId={promotionId || ""}
+          anneeId={anneeId || ""}
           onDelete={handleDeleteEtudiant}
           onRefresh={refreshEtudiants}
           isLoading={isLoading}
+          promotionInfo = {promotion}
         />
       </div>
 

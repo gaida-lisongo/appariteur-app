@@ -70,12 +70,12 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
     <>
       <div className="grid grid-cols-12 gap-6">
         {/* Contenu principal - prend 2/3 de l'espace (8/12 colonnes) */}
-        <div className="col-span-12 lg:col-span-8">
+        <div className="col-span-12 lg:col-span-9">
           {children}
         </div>
 
         {/* Sidebar de formulaire - prend 1/3 de l'espace (4/12 colonnes) */}
-        <div className="col-span-12 lg:col-span-4">
+        <div className="col-span-12 lg:col-span-3">
           {/* Boutons d'action quand aucun formulaire n'est affiché */}
           {!formType && (
             <div className="mb-6 flex flex-col gap-4">

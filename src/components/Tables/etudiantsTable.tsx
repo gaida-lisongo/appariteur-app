@@ -15,7 +15,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
+import React from 'react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { User, Mail, Calendar, BarChart2, BookOpen, GraduationCap, Hash } from 'lucide-react';
+import CreateEtudiantModal from "@/components/Tables/CreateEtudiantModal";
+import { Promotion } from "@/types/api.types";
+import useUserStore from "@/store/useUserStore";
 // Type pour les données d'étudiants
 type Etudiant = {
   _id: string;
@@ -40,24 +46,29 @@ type Etudiant = {
 type EtudiantsTableProps = {
   etudiants: Etudiant[];
   promotionId: string;
+  anneeId: string;
   onDelete?: (id: string) => void;
   onRefresh?: () => void;
   isLoading?: boolean;
+  promotionInfo: Promotion | null; // Information sur la promotion
 };
 
 export function EtudiantsTable({ 
   etudiants = [], 
   promotionId,
+  anneeId,
   onDelete,
   onRefresh,
-  isLoading = false
+  isLoading = false,
+  promotionInfo
 }: EtudiantsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<string>("nom");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { setEtudiants } = useUserStore();
   // Filtrer les étudiants selon le terme de recherche
   const filteredEtudiants = etudiants.filter(
     (etudiant) =>
@@ -65,8 +76,10 @@ export function EtudiantsTable({
       etudiant.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (etudiant.email && etudiant.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (etudiant.matricule && etudiant.matricule.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+
   );
-  
+  console.log("Etudiants : ", etudiants);
   // Trier les étudiants
   const sortedEtudiants = [...filteredEtudiants].sort((a, b) => {
     const fieldA = a[sortField as keyof Etudiant] || "";
@@ -88,6 +101,54 @@ export function EtudiantsTable({
     startIndex,
     startIndex + itemsPerPage
   );
+  // Fonction pour gérer la création d'un étudiant
+  const handleCreateEtudiant = async (etudiantData: any) => {
+    try {
+      console.log("Données de l'étudiant à enregistrer:", etudiantData);
+      const newInscrit = {
+        _id: etudiantData._id,
+        nom: etudiantData?.infoPerso.nom,
+        prenom: etudiantData?.infoPerso.preNom,
+        email: etudiantData?.infoSec.email,
+        matricule: etudiantData?.infoSec.etudiantId,
+        sexe: etudiantData?.infoPerso.sexe,
+        dateNaissance: etudiantData?.infoPerso.dateNaissance,
+        section: etudiantData?.infoScol.section,
+        option: etudiantData?.infoScol.option,
+        pourcentage: etudiantData?.infoScol.pourcentage,
+        optId: etudiantData?.infoSec.optId
+      }
+
+      console.log('Current Etudiants:', etudiants);
+
+      // Rechargement de la page
+      window.location.reload();
+      // Mettre à jour la liste des étudiants dans le store
+      const updateInscrits = [{
+        promotionId: promotionId,
+        inscrits: [...etudiants[0].inscrits, newInscrit]
+      }];
+      
+      setEtudiants(updateInscrits);
+      // Appel API à implémenter
+      // const response = await fetch('/api/etudiants', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(etudiantData),
+      // });
+      
+      // Simulation de délai pour l'exemple
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Rafraîchir la liste après création
+      if (onRefresh) onRefresh();
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Erreur lors de la création de l'étudiant:", error);
+      return Promise.reject(new Error("La création de l'étudiant a échoué"));
+    }
+  };
   
   // Gérer le changement de tri
   const handleSort = (field: string) => {
@@ -143,13 +204,13 @@ export function EtudiantsTable({
         </h4>
         
         <div className="flex flex-wrap gap-2 md:gap-4">
-          <Link
-            href={`/etudiants/promotion/${promotionId}/nouveau`}
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
             className="inline-flex items-center gap-2 rounded-md bg-primary py-2 px-4 text-sm font-medium text-white hover:bg-opacity-90"
           >
             <UserPlus className="h-4 w-4" />
             <span>Ajouter</span>
-          </Link>
+          </button>
           
           <button
             className="inline-flex items-center gap-2 rounded-md border border-stroke py-2 px-4 text-sm font-medium hover:border-primary hover:text-primary dark:border-strokedark"
@@ -257,11 +318,11 @@ export function EtudiantsTable({
               </th>
               <th
                 className="py-4 px-4 font-medium text-black dark:text-white cursor-pointer"
-                onClick={() => handleSort("hasPaid")}
+                onClick={() => handleSort("hasContact")}
               >
                 <div className="flex items-center gap-1">
-                  Paiements
-                  {sortField === "hasPaid" && (
+                  Contact
+                  {sortField === "hasContact" && (
                     <ArrowDown 
                       className={`h-3.5 w-3.5 transition-transform ${sortDirection === "desc" ? "rotate-180" : ""}`} 
                     />
@@ -305,7 +366,7 @@ export function EtudiantsTable({
                     </div>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{etudiant.matricule || "Non défini"}</p>
+                    <p className="text-black dark:text-white">{etudiant.optId || "Non défini"}</p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">
@@ -323,11 +384,7 @@ export function EtudiantsTable({
                           ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300"
                           : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300"
                     }`}>
-                      {etudiant.hasPaid 
-                        ? "Payé" 
-                        : etudiant.isPaying 
-                          ? "En cours" 
-                          : "Non payé"}
+                      {etudiant.matricule}
                     </div>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -415,6 +472,19 @@ export function EtudiantsTable({
           </div>
         </div>
       )}
+      {/* Ajouter le modal à la fin du composant */}
+      <CreateEtudiantModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleCreateEtudiant}
+        promotionId={promotionId}
+        anneeId= {anneeId} // Remplacer par l'ID d'année réel
+        promotionNom={promotionInfo?.niveau}
+        anneeNom={`${promotionInfo?.mention} ${promotionInfo?.orientation || ""}`}
+      />
     </div>
   );
 }
+
+
+export default EtudiantsTable;

@@ -1,4 +1,4 @@
-import { Appariteur, AppariteurResponse, EtudiantResponse, MinervalResponse, PromotionResponse } from "@/types/api.types";
+import { Appariteur, AppariteurResponse, Etudiant, EtudiantResponse, MinervalResponse, PromotionResponse } from "@/types/api.types";
 
 class AppariteurService {
     baseUrl: string;
@@ -290,6 +290,24 @@ class AppariteurService {
             return response;
         } catch (error) {
             console.error('Error fetching etudiant:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async updateEtudiant({id, data}: {id: string, data: Etudiant}) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants/${id}`, {
+                method: 'PUT',
+                headers: this.headers,
+                body: JSON.stringify(data)
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error updating etudiant:', error);
             throw error; // Rethrow the error to be handled by the caller            
         }
     }

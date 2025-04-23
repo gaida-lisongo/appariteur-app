@@ -16,12 +16,10 @@ import {
   School
 } from "lucide-react";
 import services from "@/services";
-import { set } from "date-fns";
-import { id } from "date-fns/locale";
 
 export default function EtudiantPage() {
   const { slug } = useParams();
-  const { etudiant, isLoading, setEtudiant, promotions } = useUserStore();
+  const { etudiant, isLoading, fetchEtudiant, promotions } = useUserStore();
   const { Appariteur } = services;
   
   // État pour gérer les onglets
@@ -42,45 +40,41 @@ export default function EtudiantPage() {
     actifs: {}
   });
   
-  // État pour la liste des promotions et années disponibles
+  // État pour la liste des années disponibles
   const [annees, setAnnees] = useState<Array<{id: string, nom: string}>>([]);
   const [loading, setLoading] = useState(false);
-  // États pour les formulaires existants...
+  
+  // États pour les formulaires
   const [personalInfo, setPersonalInfo] = useState({
-    nom: etudiant?.infoPerso.nom || "",
-    postNom: etudiant?.infoPerso.postNom || "",
-    preNom: etudiant?.infoPerso.preNom || "",
-    sexe: etudiant?.infoPerso.sexe || "M",
-    dateNaissance: etudiant?.infoPerso.dateNaissance || "",
-    lieuNaissance: etudiant?.infoPerso.lieuNaissance || "",
-    adresse: etudiant?.infoPerso.adresse || "",
+    nom: "",
+    postNom: "",
+    preNom: "",
+    sexe: "M",
+    dateNaissance: "",
+    lieuNaissance: "",
+    adresse: "",
   });
 
-  // Autres états pour formulaires...
   const [contactInfo, setContactInfo] = useState({
-    etudiantId: etudiant?.infoSec.etudiantId || "",
-    email: etudiant?.infoSec.email || "",
-    telephone: etudiant?.infoSec.telephone || "",
-    optId: etudiant?.infoSec.optId || "",
+    etudiantId: "",
+    email: "",
+    telephone: "",
+    optId: "",
   });
 
   const [schoolInfo, setSchoolInfo] = useState({
-    section: etudiant?.infoScol.section || "",
-    option: etudiant?.infoScol.option || "",
-    pourcentage: etudiant?.infoScol.pourcentage?.toString() || "",
+    section: "",
+    option: "",
+    pourcentage: "",
   });
 
-  // Charger les promotions et années disponibles au chargement du composant
+  // Charger les années disponibles au chargement du composant
   useEffect(() => {
-    
-    // Simulation de chargement des années académiques
     const fetchAnnees = async () => {
       try {
         setLoading(true);
         const response = await Appariteur.getAllAnnees();
 
-        console.log("Réponse des années académiques:", response);
-        
         if(response.success) {
             const { data } = response;
             const allAnnees = data.map((annee: any) => ({
@@ -93,17 +87,22 @@ export default function EtudiantPage() {
             console.error("Erreur lors de la récupération des années académiques:", response.message);
             throw new Error(response.message);
         }
-
-        setLoading(false);
       } catch (error) {
         console.error("Erreur lors du chargement des années académiques:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    console.log("Infos Acad :", etudiant?.infoAcad);
+
     fetchAnnees();
+    
+    // Recharger les données de l'étudiant si nécessaire
+    if (slug && !etudiant) {
+      fetchEtudiant(slug as string);
+    }
   }, []);
 
-  // Mettre à jour les états quand etudiant change
+  // Mettre à jour les états des formulaires lorsque etudiant change
   useEffect(() => {
     if (etudiant) {
       setPersonalInfo({
@@ -131,7 +130,7 @@ export default function EtudiantPage() {
     }
   }, [etudiant]);
 
-  // Gérer les changements dans les champs des formulaires existants...
+  // Gérer les changements dans les formulaires
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setPersonalInfo(prev => ({ ...prev, [name]: value }));
@@ -147,17 +146,17 @@ export default function EtudiantPage() {
     setSchoolInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  // Gérer les changements dans les champs du nouvel élément académique
+  // Gérer les changements pour la nouvelle information académique
   const handleNewAcadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     
     // Si on change la promotion, trouver son nom pour l'affichage
     if (name === 'promotionId') {
-      const selectedPromotion = promotions.find(p => p.id === value);
+      const selectedPromotion = promotions?.find(p => p._id === value);
       setNewAcadInfo(prev => ({ 
         ...prev, 
         [name]: value,
-        promotionNom: selectedPromotion?.nom || ""
+        promotionNom: selectedPromotion ? `${selectedPromotion.niveau} ${selectedPromotion.mention} ${selectedPromotion.orientation || ""}` : ""
       }));
     } 
     // Si on change l'année académique, trouver son nom pour l'affichage
@@ -175,8 +174,144 @@ export default function EtudiantPage() {
     }
   };
 
+  // Soumettre le formulaire des informations personnelles
+  const handlePersonalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!etudiant) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      // Créer l'objet de mise à jour
+      const updateData = {
+        ...etudiant,// Assurez-vous d'inclure l'ID pour l'API
+        infoPerso: {
+          ...etudiant.infoPerso, // Conserver les valeurs existantes non modifiées
+          ...personalInfo      // Appliquer les nouvelles valeurs
+        }
+      };
+      
+      // Appeler la fonction de mise à jour
+      const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
+      console.log("Response of updateEtudiant: ", response);
+      // Afficher un message de succès
+      setMessage({
+        type: 'success',
+        text: 'Informations personnelles mises à jour avec succès'
+      });
+      
+      // Rafraîchir les données
+      if (slug) {
+        fetchEtudiant(slug as string);
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'Erreur lors de la mise à jour des informations'
+      });
+    } finally {
+      setIsSaving(false);
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  // Soumettre le formulaire des informations de contact
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!etudiant) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      // Créer l'objet de mise à jour
+      const updateData = {
+        ...etudiant, // Assurez-vous d'inclure l'ID pour l'API
+        infoSec: {
+          ...etudiant.infoSec, // Conserver les valeurs existantes
+          ...contactInfo      // Appliquer les nouvelles valeurs
+        }
+      };
+      
+      // Appeler la fonction de mise à jour
+      const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
+      console.log("Response of updateEtudiant: ", response);
+
+      // Afficher un message de succès
+      setMessage({
+        type: 'success',
+        text: 'Informations de contact mises à jour avec succès'
+      });
+      
+      // Rafraîchir les données
+      if (slug) {
+        fetchEtudiant(slug as string);
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'Erreur lors de la mise à jour des informations'
+      });
+    } finally {
+      setIsSaving(false);
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  // Soumettre le formulaire des informations scolaires
+  const handleSchoolSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!etudiant) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      // Créer l'objet de mise à jour
+      const updateData = {
+        ...etudiant, // Assurez-vous d'inclure l'ID pour l'API
+        infoScol: {
+          ...etudiant.infoScol,
+          section: schoolInfo.section,
+          option: schoolInfo.option,
+          pourcentage: schoolInfo.pourcentage ? Number(schoolInfo.pourcentage) : undefined,
+        }
+      };
+      
+      // Appeler la fonction de mise à jour
+      const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
+      console.log("Response of updateEtudiant: ", response);
+
+      // Afficher un message de succès
+      setMessage({
+        type: 'success',
+        text: 'Informations scolaires mises à jour avec succès'
+      });
+      
+      // Rafraîchir les données
+      if (slug) {
+        fetchEtudiant(slug as string);
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'Erreur lors de la mise à jour des informations'
+      });
+    } finally {
+      setIsSaving(false);
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
   // Ajouter une nouvelle information académique
-  const handleAddAcadInfo = () => {
+  const handleAddAcadInfo = async () => {
     if (!etudiant || !newAcadInfo.promotionId || !newAcadInfo.anneeId) {
       setMessage({
         type: 'error',
@@ -187,7 +322,12 @@ export default function EtudiantPage() {
 
     // Vérifier si cette combinaison promotion/année existe déjà
     const exists = etudiant.infoAcad.some(
-      info => info.promotionId === newAcadInfo.promotionId && info.anneeId === newAcadInfo.anneeId
+      info => {
+        const promotionIdToCompare = typeof info.promotionId === 'object' ? info.promotionId._id : info.promotionId;
+        const anneeIdToCompare = typeof info.anneeId === 'object' ? info.anneeId._id : info.anneeId;
+        
+        return promotionIdToCompare === newAcadInfo.promotionId && anneeIdToCompare === newAcadInfo.anneeId;
+      }
     );
 
     if (exists) {
@@ -202,202 +342,102 @@ export default function EtudiantPage() {
     setMessage(null);
 
     try {
-      // Simuler un appel API
-      // En production, vous feriez un appel API réel ici
-      setTimeout(() => {
-        // Créer une nouvelle entrée académique
-        const newAcadEntry = {
-          promotionId: newAcadInfo.promotionId,
-          anneeId: newAcadInfo.anneeId,
-          actifs: {}
-        };
-        
-        // Mettre à jour l'étudiant avec la nouvelle information académique
-        const updatedEtudiant = {
-          ...etudiant,
-          infoAcad: [...etudiant.infoAcad, newAcadEntry]
-        };
-        
-        // Mettre à jour le store
-        setEtudiant(updatedEtudiant);
-        
-        // Réinitialiser le formulaire
-        setNewAcadInfo({
-          promotionId: "",
-          anneeId: "",
-          anneeNom: "",
-          promotionNom: "",
-          actifs: {}
-        });
-        
-        setMessage({
-          type: 'success',
-          text: 'Informations académiques ajoutées avec succès'
-        });
-        
-        setIsSaving(false);
-      }, 1000);
+      // Créer une nouvelle entrée académique
+      const newAcadEntry = {
+        promotionId: newAcadInfo.promotionId,
+        anneeId: newAcadInfo.anneeId,
+        actifs: {}
+      };
+      
+      // Créer l'objet de mise à jour
+      const updateData = {
+        _id: etudiant._id,
+        infoAcad: [...etudiant.infoAcad, newAcadEntry]
+      };
+      
+      // Appeler la fonction de mise à jour
+      const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
+      console.log("Response of updateEtudiant: ", response);
+      
+      // Réinitialiser le formulaire
+      setNewAcadInfo({
+        promotionId: "",
+        anneeId: "",
+        anneeNom: "",
+        promotionNom: "",
+        actifs: {}
+      });
+      
+      // Afficher un message de succès
+      setMessage({
+        type: 'success',
+        text: 'Informations académiques ajoutées avec succès'
+      });
+      
+      // Rafraîchir les données
+      if (slug) {
+        fetchEtudiant(slug as string);
+      }
     } catch (error) {
+        console.log("Error of Promotion : ", error);
       setMessage({
         type: 'error',
         text: 'Erreur lors de l\'ajout des informations académiques'
       });
+    } finally {
       setIsSaving(false);
+      
+      // Masquer le message après 3 secondes
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
   // Supprimer une information académique
-  const handleDeleteAcadInfo = (index: number) => {
+  const handleDeleteAcadInfo = async (index: number) => {
     if (!etudiant) return;
 
     setIsSaving(true);
     setMessage(null);
 
     try {
-      // Simuler un appel API
-      // En production, vous feriez un appel API réel ici
-      setTimeout(() => {
-        // Créer une copie du tableau infoAcad sans l'élément à supprimer
-        const updatedInfoAcad = [...etudiant.infoAcad];
-        updatedInfoAcad.splice(index, 1);
-        
-        // Mettre à jour l'étudiant
-        const updatedEtudiant = {
-          ...etudiant,
-          infoAcad: updatedInfoAcad
-        };
-        
-        // Mettre à jour le store
-        setEtudiant(updatedEtudiant);
-        
-        setMessage({
-          type: 'success',
-          text: 'Informations académiques supprimées avec succès'
-        });
-        
-        setIsSaving(false);
-      }, 1000);
+      // Créer une copie du tableau infoAcad sans l'élément à supprimer
+      const updatedInfoAcad = [...etudiant.infoAcad];
+      updatedInfoAcad.splice(index, 1);
+      
+      // Créer l'objet de mise à jour
+      const updateData = {
+        _id: etudiant._id,
+        infoAcad: updatedInfoAcad
+      };
+      
+      // Appeler la fonction de mise à jour
+      const response = await Appariteur.updateEtudiant({id: etudiant._id , data: updateData});
+      console.log("Response of updateEtudiant: ", response);
+      
+      // Afficher un message de succès
+      setMessage({
+        type: 'success',
+        text: 'Informations académiques supprimées avec succès'
+      });
+      
+      // Rafraîchir les données
+      if (slug) {
+        fetchEtudiant(slug as string);
+      }
     } catch (error) {
       setMessage({
         type: 'error',
         text: 'Erreur lors de la suppression des informations académiques'
       });
-      setIsSaving(false);
-    }
-  };
-
-  // Gestionnaires de soumission des formulaires existants...
-  const handlePersonalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!etudiant) return;
-
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mettre à jour le store
-      const updatedEtudiant = {
-        ...etudiant,
-        infoPerso: {
-          ...etudiant.infoPerso,
-          ...personalInfo
-        }
-      };
-      
-      setEtudiant(updatedEtudiant);
-
-      setMessage({
-        type: 'success',
-        text: 'Informations personnelles mises à jour avec succès'
-      });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: 'Erreur lors de la mise à jour des informations'
-      });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!etudiant) return;
-
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mettre à jour le store
-      const updatedEtudiant = {
-        ...etudiant,
-        infoSec: {
-          ...etudiant.infoSec,
-          ...contactInfo
-        }
-      };
       
-      setEtudiant(updatedEtudiant);
-
-      setMessage({
-        type: 'success',
-        text: 'Informations de contact mises à jour avec succès'
-      });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: 'Erreur lors de la mise à jour des informations'
-      });
-    } finally {
-      setIsSaving(false);
+      // Masquer le message après 3 secondes
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
-  const handleSchoolSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!etudiant) return;
-
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mettre à jour le store
-      const updatedEtudiant = {
-        ...etudiant,
-        infoScol: {
-          ...etudiant.infoScol,
-          section: schoolInfo.section,
-          option: schoolInfo.option,
-          pourcentage: schoolInfo.pourcentage ? Number(schoolInfo.pourcentage) : undefined,
-        }
-      };
-      
-      setEtudiant(updatedEtudiant);
-
-      setMessage({
-        type: 'success',
-        text: 'Informations scolaires mises à jour avec succès'
-      });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: 'Erreur lors de la mise à jour des informations'
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Affichage conditionnel pour chargement et erreurs...
+  // Affichage conditionnel pour chargement et erreurs
   if (isLoading || loading) {
     return (
       <div className="p-5 flex items-center justify-center h-64">
@@ -417,33 +457,71 @@ export default function EtudiantPage() {
 
   // Format d'affichage pour les données académiques
   const getAcadInfoDisplay = (infoAcad: any, index: number) => {
-    // Trouver les objets correspondants dans les listes de promotions et années
-    const promotion = promotions.find(p => p.id === infoAcad.promotionId);
-    const annee = annees.find(a => a.id === infoAcad.anneeId);
+    /*
+    Structure de infoAcad comme indiqué dans les commentaires:
+    {
+        _id: string;
+        promotionId: {
+            _id: string;
+            niveau: string;
+            mention: string;
+            orientation: string;
+            description: string;
+        },
+        anneeId: {
+            _id: string;
+            slogan: string;
+            debut: number;
+            fin: number;
+        }     
+    }
+    */
     
-    // Extraire le nom comme une chaîne de caractères, ou utiliser l'ID si l'objet n'est pas trouvé
-    const promotionNom = promotion ? promotion.nom : infoAcad.promotionId;
-    const anneeNom = annee ? annee.nom : infoAcad.anneeId;
+    // Accéder directement aux propriétés de l'objet imbriqué
+    const promotionId = typeof infoAcad.promotionId === 'object' ? infoAcad.promotionId._id : infoAcad.promotionId;
+    const niveau = typeof infoAcad.promotionId === 'object' ? infoAcad.promotionId.niveau : "Non défini";
+    const mention = typeof infoAcad.promotionId === 'object' ? infoAcad.promotionId.mention : "";
+    const orientation = typeof infoAcad.promotionId === 'object' ? infoAcad.promotionId.orientation : "";
+    
+    // Formater l'année académique
+    const anneeId = typeof infoAcad.anneeId === 'object' ? infoAcad.anneeId._id : infoAcad.anneeId;
+    const slogan = typeof infoAcad.anneeId === 'object' ? infoAcad.anneeId.slogan : "Non définie";
+    const debut = typeof infoAcad.anneeId === 'object' ? infoAcad.anneeId.debut : "";
+    const fin = typeof infoAcad.anneeId === 'object' ? infoAcad.anneeId.fin : "";
+    
+    const anneeFormatee = debut && fin ? `${debut}-${fin}` : slogan;
     
     return (
-      <div key={index} className="flex justify-between items-center bg-gray-50 dark:bg-meta-4 p-3 rounded-md mb-2">
-        <div>
+      <div key={index} className="flex justify-between items-center bg-gray-50 dark:bg-meta-4 p-3 rounded-md mb-2 hover:bg-gray-100 dark:hover:bg-meta-3 transition-colors">
+        <div className="flex-1">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-primary" />
-            <span className="font-medium">{typeof promotionNom === 'string' ? promotionNom : JSON.stringify(promotionNom)}</span>
+            <span className="font-medium">{niveau}</span>
+            {orientation && <span className="text-sm text-body-color dark:text-body-color-dark">({orientation})</span>}
           </div>
-          <div className="flex items-center gap-2 mt-1 text-sm text-body-color dark:text-body-color-dark">
+          
+          <div className="mt-1">
+            {mention && (
+              <span className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full mr-2">
+                {mention}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 mt-2 text-sm text-body-color dark:text-body-color-dark">
             <Calendar className="h-3.5 w-3.5" />
-            <span>{typeof anneeNom === 'string' ? anneeNom : JSON.stringify(anneeNom)}</span>
+            <span>{anneeFormatee}</span>
           </div>
         </div>
+        
         <button
           type="button"
           onClick={() => handleDeleteAcadInfo(index)}
-          className="text-danger hover:text-opacity-80"
+          className="text-danger hover:text-opacity-80 p-2 hover:bg-danger/10 rounded-full transition-colors"
           title="Supprimer"
+          aria-label="Supprimer cette année académique"
         >
-          <Trash2 size={16} />
+          <Trash2 size={18} />
         </button>
       </div>
     );
@@ -555,7 +633,6 @@ export default function EtudiantPage() {
                   />
                 </div>
 
-                {/* Autres champs d'informations personnelles... */}
                 <div>
                   <label 
                     htmlFor="preNom"
@@ -665,7 +742,7 @@ export default function EtudiantPage() {
             </form>
           )}
 
-          {/* Informations de contact et scolaires (onglets existants)... */}
+          {/* Informations de contact */}
           {activeTab === "contact" && (
             <form onSubmit={handleContactSubmit}>
               <h2 className="text-xl font-semibold text-black dark:text-white flex items-center gap-2 mb-6">
@@ -762,6 +839,7 @@ export default function EtudiantPage() {
             </form>
           )}
 
+          {/* Informations scolaires */}
           {activeTab === "school" && (
             <form onSubmit={handleSchoolSubmit}>
               <h2 className="text-xl font-semibold text-black dark:text-white flex items-center gap-2 mb-6">

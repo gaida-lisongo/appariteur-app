@@ -79,7 +79,10 @@ const PromotionPage = () => {
 
           // Charger les étudiants de cette promotion
           const etudiantsData = await fetchEtudiants(selectedPromotion._id);
+
+          console.log("Étudiants de la promotion:", etudiantsData);
           if (etudiantsData && etudiantsData.length > 0 && etudiantsData[0].inscrits) {
+
             setEtudiants(etudiantsData[0].inscrits);
           }
           // Mettre à jour le nombre d'inscrits
@@ -106,8 +109,6 @@ const PromotionPage = () => {
   }, [promotionId, promotions, fetchEtudiants, fetchMinervals]);
 
   useEffect(() => {
-    console.log("Frais académiques:", fraisAcad);
-
     if (fraisAcad && fraisAcad.length > 0) {
       setFraisConfig(prev => ({
         ...prev,
@@ -182,78 +183,9 @@ const PromotionPage = () => {
 
   // Pour sauvegarder une tranche
   const sauvegarderTranche = async (trancheData: TrancheFormData) => {
-    console.log("Données de la tranche à sauvegarder:", trancheData);
 
     setMinervals([trancheData]);
     setFraisAcad(trancheData);
-    // try {
-    //   setTrancheError(null);
-    //   console.log("Données de la tranche à sauvegarder:", trancheData);
-      
-    //   // Préparation des données pour l'API
-    //   const payload = {
-    //     id: minervals._id,
-    //     tranche: {
-    //       ...trancheData,
-    //       _id: trancheEnEdition?._id || "" // Utilisez l'ID existant en cas de modification
-    //     }
-    //   };
-      
-    //   let updatedMinerval;
-      
-    //   // Si c'est une édition
-    //   if (trancheEnEdition && trancheEnEdition.index !== undefined) {
-    //     // Appel API - décommentez quand vous êtes prêt
-    //     // const response = await Appariteur.updateTranche(payload);
-    //     // updatedMinerval = response.data;
-        
-    //     // Pour le développement, simuler une mise à jour
-    //     const updatedTranches = [...minervals.tranches];
-    //     updatedTranches[trancheEnEdition.index] = {
-    //       ...updatedTranches[trancheEnEdition.index],
-    //       ...trancheData
-    //     };
-        
-    //     updatedMinerval = {
-    //       ...minervals,
-    //       tranches: updatedTranches
-    //     };
-    //   } 
-    //   // Si c'est un ajout
-    //   else {
-    //     // Appel API - décommentez quand vous êtes prêt
-    //     // const response = await Appariteur.addTranche(payload);
-    //     // updatedMinerval = response.data;
-        
-    //     // Pour le développement, simuler un ajout
-    //     updatedMinerval = {
-    //       ...minervals,
-    //       tranches: [
-    //         ...minervals.tranches,
-    //         {
-    //           _id: `tranche-${Date.now()}`,
-    //           ...trancheData
-    //         }
-    //       ]
-    //     };
-    //   }
-      
-    //   // Mise à jour du state global
-    //   setMinervals(updatedMinerval);
-      
-    //   // Mise à jour du state local fraisConfig
-    //   setFraisConfig(prev => ({
-    //     ...prev,
-    //     tranches: updatedMinerval.tranches,
-    //     nombreTranches: updatedMinerval.tranches.length
-    //   }));
-      
-    //   // Fermer la modal
-    //   fermerModal();
-    // } catch (error) {
-    //   console.error("Erreur lors de la sauvegarde de la tranche:", error);
-    //   setTrancheError("Une erreur est survenue lors de la sauvegarde de la tranche");
-    // }
   };
 
   // Pour supprimer une tranche
@@ -264,8 +196,6 @@ const PromotionPage = () => {
         console.log("Tranche à supprimer:", payload);
         const request = await Appariteur.deleteTranche(payload);
         if (request.success) {
-
-          console.log("Tranche supprimée avec succès:", request.data);
           alert("Tranche supprimée avec succès!");
           setMinervals([request.data]);
 
@@ -340,53 +270,6 @@ const PromotionPage = () => {
 
       // Rechargerment de la page
       window.location.reload();
-      // Préparation des données pour l'API
-      // const minervalData = {
-      //   promotionId: promotion._id,
-      //   anneeId: anneeId,
-      //   montant: fraisData.montant,
-      //   devise: fraisData.devise,
-      //   // Ajoutez d'autres champs nécessaires à votre API
-      // };
-      
-      // Appel à l'API - décommentez quand vous êtes prêt à l'utiliser
-      // const response = await Appariteur.createMinerval(minervalData);
-      // const newMinerval = response.data;
-      
-      // // Simuler une réponse réussie pour l'instant
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // // Créer un objet minerval avec une seule tranche initiale
-      // const newMinerval = {
-      //   _id: `minerval-${Date.now()}`,
-      //   promotionId: promotion._id,
-      //   anneeId: anneeId,
-      //   montant: fraisData.montant,
-      //   devise: fraisData.devise,
-      //   tranches: [{
-      //     _id: `tranche-${Date.now()}`,
-      //     designation: "Tranche 1",
-      //     montant: fraisData.montant,
-      //     date_fin: new Date().toISOString().split('T')[0]
-      //   }]
-      // };
-      
-      // // Mise à jour du state global
-      // setMinervals(newMinerval);
-      // setCreateFraisModalIsOpen(false);
-      
-      // // Afficher le panneau de configuration
-      // setShowFinancePanel(true);
-      
-      // // Mettre à jour fraisConfig pour refléter le nouveau minerval
-      // setFraisConfig({
-      //   _id: newMinerval._id,
-      //   anneeAcad: anneeId || "",
-      //   montantTotal: newMinerval.montant,
-      //   devise: newMinerval.devise,
-      //   nombreTranches: 1,
-      //   tranches: newMinerval.tranches
-      // });
       
     } catch (error) {
       console.error("Erreur lors de la création des frais académiques:", error);

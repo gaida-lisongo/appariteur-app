@@ -34,6 +34,8 @@ export interface Etudiant {
         sexe: string;
         dateNaissance: string;
         adresse: string;
+        lieuNaissance: string;
+        nationalite: string;
     };
     infoSec: {
         etudiantId: string;
@@ -89,8 +91,11 @@ export interface Inscrits {
         prenom: string;
         email: string;
         matricule: string;
+        telephone: string;
+        adresse: string;
         sexe: string;
         dateNaissance: string;
+        lieuNaissance: string;
         section: string;
         option: string;
         pourcentage: number;

@@ -3,7 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { Appariteur, Etudiant, Inscrits, Minerval, Promotion, PromotionResponse } from '@/types/api.types'
 import { Agent } from '@/types/api.types'
 import services from '@/services'
-import { act } from 'react'
 
 const { Appariteur: AppariteurService } = services
 interface UserState {
@@ -103,8 +102,12 @@ const useUserStore = create<UserState>()(
                     _id: etudiant._id,
                     nom: etudiant.infoPerso.nom,
                     prenom: etudiant.infoPerso.preNom,
-                    email: etudiant.infoSec.email,
-                    matricule: etudiant.infoSec.telephone,
+                    email: etudiant.infoSec.email,                    
+                    matricule: etudiant.infoSec.etudiantId,
+                    telephone: etudiant.infoSec.telephone,
+                    adresse: etudiant.infoPerso.adresse,
+                    lieuNaissance: etudiant.infoPerso.lieuNaissance,
+                    nationalite: etudiant.infoPerso.nationalite,
                     sexe: etudiant.infoPerso.sexe,
                     dateNaissance: etudiant.infoPerso.dateNaissance,
                     section: etudiant.infoScol.section,

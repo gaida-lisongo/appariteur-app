@@ -8,7 +8,6 @@ import {
   Download,
   Eye,
   Filter,
-  Printer,
   Search,
   Trash2,
   UserPlus
@@ -20,8 +19,11 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { User, Mail, Calendar, BarChart2, BookOpen, GraduationCap, Hash } from 'lucide-react';
 import CreateEtudiantModal from "@/components/Tables/CreateEtudiantModal";
+import { ExportModal } from '@/components/Tables/ExportModal';
 import { Promotion } from "@/types/api.types";
 import useUserStore from "@/store/useUserStore";
+import { exportEtudiantsToExcel } from '@/utils/excelExport';
+
 // Type pour les données d'étudiants
 type Etudiant = {
   _id: string;
@@ -68,7 +70,8 @@ export function EtudiantsTable({
   const [sortField, setSortField] = useState<string>("nom");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { setEtudiants, fetchEtudiant } = useUserStore();
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const { setEtudiants, fetchEtudiant, activeAppariteur } = useUserStore();
   // Filtrer les étudiants selon le terme de recherche
   const filteredEtudiants = etudiants.filter(
     (etudiant) =>
@@ -76,10 +79,8 @@ export function EtudiantsTable({
       etudiant.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (etudiant.email && etudiant.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (etudiant.matricule && etudiant.matricule.toLowerCase().includes(searchTerm.toLowerCase()))
-    
-
   );
-  console.log("Etudiants : ", etudiants);
+  
   // Trier les étudiants
   const sortedEtudiants = [...filteredEtudiants].sort((a, b) => {
     const fieldA = a[sortField as keyof Etudiant] || "";
@@ -104,23 +105,23 @@ export function EtudiantsTable({
   // Fonction pour gérer la création d'un étudiant
   const handleCreateEtudiant = async (etudiantData: any) => {
     try {
-      console.log("Données de l'étudiant à enregistrer:", etudiantData);
       const newInscrit = {
         _id: etudiantData._id,
         nom: etudiantData?.infoPerso.nom,
         prenom: etudiantData?.infoPerso.preNom,
         email: etudiantData?.infoSec.email,
         matricule: etudiantData?.infoSec.etudiantId,
+        telephone: etudiantData?.infoSec.telephone,
+        adresse: etudiantData?.infoPerso.adresse,
         sexe: etudiantData?.infoPerso.sexe,
         dateNaissance: etudiantData?.infoPerso.dateNaissance,
+        lieuNaissance: etudiantData?.infoPerso.lieuNaissance,
+        nationalite: etudiantData?.infoPerso.nationalite,
         section: etudiantData?.infoScol.section,
         option: etudiantData?.infoScol.option,
         pourcentage: etudiantData?.infoScol.pourcentage,
         optId: etudiantData?.infoSec.optId
       }
-
-      console.log('Current Etudiants:', etudiants);
-
       // Rechargement de la page
       window.location.reload();
       // Mettre à jour la liste des étudiants dans le store
@@ -147,6 +148,57 @@ export function EtudiantsTable({
     } catch (error) {
       console.error("Erreur lors de la création de l'étudiant:", error);
       return Promise.reject(new Error("La création de l'étudiant a échoué"));
+    }
+  };
+
+  // Ajouter cette fonction pour l'exportation
+  const handleExportExcel = async () => {
+    let anneeAcademique = activeAppariteur?.anneeId.slogan; // Valeur par défaut
+    
+    try {
+      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique.replace('/', '-')}.xlsx`;
+      
+      const title = `LISTE DES ÉTUDIANTS - ${promotionInfo?.niveau || ''} ${promotionInfo?.mention || ''} ${promotionInfo?.orientation || ''}`;
+      
+      await exportEtudiantsToExcel(
+        filteredEtudiants, // Exporter tous les étudiants filtrés (pas juste la page actuelle)
+        promotionInfo,
+        anneeAcademique,
+        {
+          title,
+          filename,
+          sheetName: `Étudiants ${promotionInfo?.niveau || ''}`
+        }
+      );
+    } catch (error) {
+      console.error("Erreur lors de l'exportation:", error);
+    }
+  };
+
+  // Fonction pour exporter avec options personnalisées
+  const handleCustomExport = async ({ fields, includeHeader }: { fields: string[], includeHeader: boolean }) => {
+    let anneeAcademique = activeAppariteur?.anneeId.slogan; // Valeur par défaut (à remplacer par une valeur dynamique)
+    
+    try {
+      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique.replace('/', '-')}.xlsx`;
+      
+      const title = `LISTE DES ÉTUDIANTS - ${promotionInfo?.niveau || ''} ${promotionInfo?.mention || ''} ${promotionInfo?.orientation || ''}`;
+      
+      // Vous devrez modifier la fonction exportEtudiantsToExcel pour accepter fields et includeHeader
+      await exportEtudiantsToExcel(
+        filteredEtudiants,
+        promotionInfo,
+        anneeAcademique,
+        {
+          title,
+          filename,
+          sheetName: `Étudiants ${promotionInfo?.niveau || ''}`,
+          includeHeader,
+          fields
+        }
+      );
+    } catch (error) {
+      console.error("Erreur lors de l'exportation:", error);
     }
   };
   
@@ -212,21 +264,33 @@ export function EtudiantsTable({
             <span>Ajouter</span>
           </button>
           
-          <button
-            className="inline-flex items-center gap-2 rounded-md border border-stroke py-2 px-4 text-sm font-medium hover:border-primary hover:text-primary dark:border-strokedark"
-            onClick={onRefresh}
-          >
-            <Download className="h-4 w-4" />
-            <span>Exporter</span>
-          </button>
-          
-          <button
-            className="inline-flex items-center gap-2 rounded-md border border-stroke py-2 px-4 text-sm font-medium hover:border-primary hover:text-primary dark:border-strokedark"
-            onClick={() => window.print()}
-          >
-            <Printer className="h-4 w-4" />
-            <span>Imprimer</span>
-          </button>
+          <div className="relative group">
+            <button
+              className="inline-flex items-center gap-2 rounded-md border border-stroke py-2 px-4 text-sm font-medium hover:border-primary hover:text-primary dark:border-strokedark"
+              onClick={() => setIsExportModalOpen(true)}
+            >
+              <Download className="h-4 w-4" />
+              <span>Exporter</span>
+            </button>
+            
+            {/* Menu déroulant d'exportation */}
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-boxdark rounded-md shadow-lg border border-stroke dark:border-strokedark hidden group-hover:block z-10">
+              <div className="py-1">
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-meta-4"
+                >
+                  Export Excel rapide
+                </button>
+                <button
+                  onClick={() => setIsExportModalOpen(true)}
+                  className="w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-meta-4"
+                >
+                  Export Excel personnalisé
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -321,7 +385,7 @@ export function EtudiantsTable({
                 onClick={() => handleSort("hasContact")}
               >
                 <div className="flex items-center gap-1">
-                  Contact
+                  ID
                   {sortField === "hasContact" && (
                     <ArrowDown 
                       className={`h-3.5 w-3.5 transition-transform ${sortDirection === "desc" ? "rotate-180" : ""}`} 
@@ -482,7 +546,7 @@ export function EtudiantsTable({
           </div>
         </div>
       )}
-      {/* Ajouter le modal à la fin du composant */}
+      {/* Ajouter les modals */}
       <CreateEtudiantModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -491,6 +555,12 @@ export function EtudiantsTable({
         anneeId= {anneeId} // Remplacer par l'ID d'année réel
         promotionNom={promotionInfo?.niveau}
         anneeNom={`${promotionInfo?.mention} ${promotionInfo?.orientation || ""}`}
+      />
+      
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleCustomExport}
       />
     </div>
   );

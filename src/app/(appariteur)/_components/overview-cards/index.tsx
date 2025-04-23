@@ -42,7 +42,7 @@ export function OverviewCardsGroup() {
             const { count } = responsePromotions;
             promotionsMetric = {
               value: `${promotions?.length ?? 0}`,
-              growthRate: count > 0 ? (((promotions?.length ?? 0) / count) * 100).toFixed(2) : 0,
+              growthRate: count > 0 ? parseFloat((((promotions?.length ?? 0) / count) * 100).toFixed(2)) : 0,
               label: "Promotions"
             };
           }
@@ -81,14 +81,14 @@ export function OverviewCardsGroup() {
               const { count } = responseEtudiants;
               etudiantsMetric = {
                 value: `${totalStudents}`,
-                growthRate: count > 0 ? (((totalStudents) / count) * 100).toFixed(2) : 0,
+                growthRate: count > 0 ? parseFloat((((totalStudents) / count) * 100).toFixed(2)) : 0,
                 label: "Étudiants"
               };
             }
             
             etudiantsMetric = {
               value: `${totalStudents}`,
-              growthRate: promotions.length > 0 ? (totalStudents / promotions.length).toFixed(2) : 0,
+              growthRate: promotions.length > 0 ? parseFloat((totalStudents / promotions.length).toFixed(2)) : 0,
               label: "Étudiants"
             };
           }
@@ -99,7 +99,7 @@ export function OverviewCardsGroup() {
         // 3. Placeholder pour les inscriptions (à implémenter selon votre logique)
         const inscriptionsMetric = {
           value: activeAppariteur ? `${activeAppariteur.inscriptions.length}` : '0',
-          growthRate: promotions && activeAppariteur ? (activeAppariteur.inscriptions.length / promotions.length).toFixed(2) : 0,
+          growthRate: promotions && activeAppariteur ? parseFloat((activeAppariteur.inscriptions.length / promotions.length).toFixed(2)) : 0,
           label: "Inscriptions"
         };
 
@@ -134,7 +134,7 @@ export function OverviewCardsGroup() {
             
             retraitsMetric = {
               value: `${totalMinerval}`,
-              growthRate: promotions.length > 0 ? (totalMinerval / promotions.length).toFixed(2) : 0,
+              growthRate: promotions.length > 0 ? parseFloat((totalMinerval / promotions.length).toFixed(2)) : 0,
               label: "Frais Academiques (CDF)"
             };
           }

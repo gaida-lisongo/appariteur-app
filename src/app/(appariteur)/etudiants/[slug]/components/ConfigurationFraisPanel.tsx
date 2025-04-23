@@ -32,7 +32,7 @@ type ConfigurationFraisPanelProps = {
   setFraisConfig: React.Dispatch<React.SetStateAction<FraisConfig>>;
   ouvrirModalAjoutTranche: () => void;
   ouvrirModalEditionTranche: (index: number) => void;
-  supprimerTranche: (index: number) => void;
+  supprimerTranche: (params: { id: string; trancheId: string }) => void;
   distribuerMontantEgal: () => void;
   saveFraisAcademiques: () => Promise<void>;
   setShowFinancePanel: (show: boolean) => void;
@@ -59,8 +59,15 @@ const ConfigurationFraisPanel = ({
     
     return () => setMinervals([]);
   }, []);
-  const totalTransactions = minervals.tranches.reduce(
-    (acc, tranche) => acc + (tranche.montant || 0), 
+  interface IMinerval {
+    _id: string;
+    montant: number;
+    devise: string;
+    tranches: Tranche[];
+  }
+
+  const totalTransactions: number = (minervals as IMinerval).tranches.reduce(
+    (acc: number, tranche: Tranche) => acc + (tranche.montant || 0),
     0
   );
   
@@ -145,37 +152,37 @@ const ConfigurationFraisPanel = ({
         </div>
         
         {minervals.tranches.length > 0 ? (
-          <div className="space-y-4">
-            {minervals.tranches.map((tranche, index) => (
+            <div className="space-y-4">
+            {minervals.tranches.map((tranche: Tranche, index: number) => (
               <div key={tranche._id || index} className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center border border-stroke p-4 rounded-md dark:border-strokedark">
-                <div className="sm:col-span-2">
-                  <h5 className="font-medium text-black dark:text-white">{tranche.designation}</h5>
-                </div>
+              <div className="sm:col-span-2">
+                <h5 className="font-medium text-black dark:text-white">{tranche.designation}</h5>
+              </div>
+              
+              <div className="sm:col-span-2">
+                <span className="text-primary font-semibold">{tranche.montant} {minervals.devise}</span>
+              </div>
+              
+              <div className="sm:col-span-2">
+                <span className="text-sm text-body-color dark:text-body-color-dark">
+                Date limite: {new Date(tranche.date_fin).toLocaleDateString()}
+                </span>
+              </div>
+              
+              <div className="sm:col-span-1 flex justify-end gap-2">
                 
-                <div className="sm:col-span-2">
-                  <span className="text-primary font-semibold">{tranche.montant} {minervals.devise}</span>
-                </div>
-                
-                <div className="sm:col-span-2">
-                  <span className="text-sm text-body-color dark:text-body-color-dark">
-                    Date limite: {new Date(tranche.date_fin).toLocaleDateString()}
-                  </span>
-                </div>
-                
-                <div className="sm:col-span-1 flex justify-end gap-2">
-                  
-                  <button
-                    type="button"
-                    onClick={() => supprimerTranche({id: minervals._id, trancheId: tranche._id})}
-                    className="flex items-center justify-center h-8 w-8 rounded-md border border-stroke hover:bg-danger hover:text-white dark:border-strokedark"
-                    aria-label="Supprimer la tranche"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <button
+                type="button"
+                onClick={() => supprimerTranche({id: minervals._id, trancheId: tranche._id})}
+                className="flex items-center justify-center h-8 w-8 rounded-md border border-stroke hover:bg-danger hover:text-white dark:border-strokedark"
+                aria-label="Supprimer la tranche"
+                >
+                <Trash2 size={16} />
+                </button>
+              </div>
               </div>
             ))}
-          </div>
+            </div>
         ) : (
           <div className="text-center py-6 border border-dashed border-stroke rounded-md dark:border-strokedark">
             <p className="text-body-color dark:text-body-color-dark">
@@ -188,7 +195,7 @@ const ConfigurationFraisPanel = ({
           <div>
             <span className="text-sm font-medium">Total configuré: </span>
             <span className="font-bold">
-              {minervals.tranches.reduce((acc, tranche) => acc + (tranche.montant || 0), 0)} {minervals.devise}
+                {minervals.tranches.reduce((acc: number, tranche: Tranche) => acc + (tranche.montant || 0), 0)} {minervals.devise}
             </span>
           </div>
           

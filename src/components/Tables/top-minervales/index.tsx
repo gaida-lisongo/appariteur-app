@@ -78,8 +78,8 @@ export function TopMinervales() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {frais.length > 0 ? (
-          frais.map((minerval) => (
+        {(frais ?? []).length > 0 ? (
+          (frais ?? []).map((minerval) => (
             <MinervalRow key={minerval._id} minerval={minerval} />
           ))
         ) : (

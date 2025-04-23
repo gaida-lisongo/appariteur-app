@@ -249,7 +249,7 @@ class AppariteurService {
                 body: JSON.stringify(data)
             });
             if (!request.ok) {
-                throw new Error(`HTTP error! status: ${request?.message}`);
+                throw new Error(`HTTP error! status: ${request?.status}`);
             }
             const response = await request.json();
             

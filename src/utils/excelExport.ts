@@ -24,6 +24,9 @@ interface ExportOptions {
   filename?: string;
   sheetName?: string;
   logoPath?: string;
+  includeLogo?: boolean;
+  includeHeader?: boolean;
+  fields?: string[]; // Liste des champs à inclure dans l'export
 }
 
 export async function exportEtudiantsToExcel(

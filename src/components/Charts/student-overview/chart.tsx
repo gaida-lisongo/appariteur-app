@@ -40,9 +40,9 @@ export function StudentOverviewChart({ data }: PropsType) {
             tick={{ 
               fill: "#98A2B3", 
               fontSize: 12,
-              angle: -90, // Rotation verticale des labels
+              transform: "rotate(-90)",
               textAnchor: 'end', // Pour aligner les textes correctement après la rotation
-              dy: 10 // Décalage vertical pour éviter que le texte ne chevauche l'axe
+              dy: -5 // Décalage vertical pour éviter que le texte ne chevauche l'axe
             }}
             height={60} // Augmentation de la hauteur pour accommoder les labels verticaux
             interval={0} // Afficher tous les labels sans sauter

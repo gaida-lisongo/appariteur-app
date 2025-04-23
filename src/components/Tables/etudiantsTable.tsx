@@ -43,6 +43,16 @@ type Etudiant = {
   telPersonneContact?: string;
   isPaying?: boolean;  // Indique si l'étudiant paie régulièrement
   hasPaid?: boolean;  // Indique si l'étudiant a payé toutes ses tranches
+  inscrits?: any[];  // Ajouter cette propriété
+  optId?: string;  // Identifiant optionnel
+};
+
+type ExportOptions = {
+  title: string;
+  filename: string;
+  sheetName: string;
+  fields?: string[];
+  includeHeader?: boolean;
 };
 
 type EtudiantsTableProps = {
@@ -127,7 +137,7 @@ export function EtudiantsTable({
       // Mettre à jour la liste des étudiants dans le store
       const updateInscrits = [{
         promotionId: promotionId,
-        inscrits: [...etudiants[0].inscrits, newInscrit]
+        inscrits: [...(etudiants[0]?.inscrits || []), newInscrit]
       }];
       
       setEtudiants(updateInscrits);
@@ -153,10 +163,10 @@ export function EtudiantsTable({
 
   // Ajouter cette fonction pour l'exportation
   const handleExportExcel = async () => {
-    let anneeAcademique = activeAppariteur?.anneeId.slogan; // Valeur par défaut
+    let anneeAcademique = activeAppariteur?.anneeId?.slogan ?? '2023/2024'; // Valeur par défaut
     
     try {
-      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique.replace('/', '-')}.xlsx`;
+      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique?.replace('/', '-') || '2023-2024'}.xlsx`;
       
       const title = `LISTE DES ÉTUDIANTS - ${promotionInfo?.niveau || ''} ${promotionInfo?.mention || ''} ${promotionInfo?.orientation || ''}`;
       
@@ -177,10 +187,10 @@ export function EtudiantsTable({
 
   // Fonction pour exporter avec options personnalisées
   const handleCustomExport = async ({ fields, includeHeader }: { fields: string[], includeHeader: boolean }) => {
-    let anneeAcademique = activeAppariteur?.anneeId.slogan; // Valeur par défaut (à remplacer par une valeur dynamique)
+    let anneeAcademique = activeAppariteur?.anneeId?.slogan ?? '2023/2024'; // Valeur par défaut
     
     try {
-      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique.replace('/', '-')}.xlsx`;
+      const filename = `liste-etudiants-${promotionInfo?.niveau || 'promotion'}-${anneeAcademique?.replace('/', '-') || '2023-2024'}.xlsx`;
       
       const title = `LISTE DES ÉTUDIANTS - ${promotionInfo?.niveau || ''} ${promotionInfo?.mention || ''} ${promotionInfo?.orientation || ''}`;
       

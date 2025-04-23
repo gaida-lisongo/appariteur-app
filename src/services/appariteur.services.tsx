@@ -107,6 +107,20 @@ class AppariteurService {
         }
     }
 
+    async getAllAnnees( ) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/annees`);
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching annees:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
     async getEtudiantsByPromotionId(promotionId: string) : Promise<EtudiantResponse> {
         try {
             const request = await fetch(`${this.baseUrl}/etudiants/find`,
@@ -259,6 +273,23 @@ class AppariteurService {
             return response;
         } catch (error) {
             console.error('Error deleting etudiant:', error);
+            throw error; // Rethrow the error to be handled by the caller            
+        }
+    }
+
+    async getEtudiantById({id}: {id: string}) : Promise<any> {
+        try {
+            const request = await fetch(`${this.baseUrl}/etudiants/${id}`, {
+                method: 'GET',
+                headers: this.headers
+            });
+            if (!request.ok) {
+                throw new Error(`HTTP error! status: ${request.status}`);
+            }
+            const response = await request.json();
+            return response;
+        } catch (error) {
+            console.error('Error fetching etudiant:', error);
             throw error; // Rethrow the error to be handled by the caller            
         }
     }

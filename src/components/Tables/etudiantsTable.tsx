@@ -68,7 +68,7 @@ export function EtudiantsTable({
   const [sortField, setSortField] = useState<string>("nom");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { setEtudiants } = useUserStore();
+  const { setEtudiants, fetchEtudiant } = useUserStore();
   // Filtrer les étudiants selon le terme de recherche
   const filteredEtudiants = etudiants.filter(
     (etudiant) =>
@@ -389,12 +389,22 @@ export function EtudiantsTable({
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <div className="flex items-center justify-end gap-3">
-                      <Link
-                        href={`/etudiants/${etudiant._id}`}
+                      <button
+                        onClick={async () => {
+                          const response = await fetchEtudiant(etudiant._id);
+                          console.log("Response:", response);
+                          if (response && response?._id) {
+                            setTimeout(() => {
+                              // Rediriger vers la page de l'étudiant
+                              window.location.href = `/etudiant/${etudiant._id}`;
+                            }, 3000);
+                          }
+                          
+                        }}
                         className="hover:text-primary"
                       >
                         <Eye className="h-5 w-5" />
-                      </Link>
+                      </button>
                       
                       {onDelete && (
                         <button

@@ -30,7 +30,7 @@ export function Sidebar() {
     }
 
     fetchMenuItems();
-  }, [promotions, activeAppariteur])
+  }, [isLoading])
 
 
   if (activeAppariteur === null) {

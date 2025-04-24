@@ -21,24 +21,24 @@ export function Sidebar() {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
   };
 
-  useEffect(()=>{
-    console.log('activeAppariteur in sidebar', agent);
-    const fetchMenuItems = async () => {
-      if (!activeAppariteur) return;
-      const response = await fetchPromotions(activeAppariteur?.sectionId._id)
-      console.log('response', response);
-    }
-
-    fetchMenuItems();
-  }, [])
-
-  if (isLoading) {
+  if (activeAppariteur === null) {
     return (
       <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
         <div className="loader" />
       </aside>
     );
   }
+
+  useEffect(()=>{
+    console.log('activeAppariteur in sidebar', agent);
+    const fetchMenuItems = async () => {
+      const response = await fetchPromotions(activeAppariteur?.sectionId._id)
+      console.log('response', response);
+    }
+
+    fetchMenuItems();
+  }, [promotions, activeAppariteur])
+
 
   return (
     <>

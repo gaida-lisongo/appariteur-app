@@ -15,7 +15,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const { fetchPromotions, activeAppariteur, promotion, setPromotion, promotions, agent } = useUserStore();
+  const { fetchPromotions, activeAppariteur, isLoading, setPromotion, promotions, agent } = useUserStore();
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
@@ -35,7 +35,24 @@ export function Sidebar() {
     }
 
     fetchMenuItems();
-  }, [promotion])
+  }, [isLoading])
+
+  if (isLoading) {
+    return (
+      <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
+        <div className="loader" />
+      </aside>
+    );
+  }
+
+  if (!promotions) {
+    return (
+      <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
+        <div className="loader" />
+      </aside>
+    );
+    
+  }
 
   return (
     <>

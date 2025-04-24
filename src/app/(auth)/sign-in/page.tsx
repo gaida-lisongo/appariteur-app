@@ -85,7 +85,7 @@ export default function SignIn() {
         makeTokenToCookie(data.token);
 
         // Rediriger vers le tableau de bord
-        router.push("/");
+        window.location.href = "/";
       } else {
         setError(data.message || "Échec de l'authentification. Veuillez vérifier vos identifiants.");
       }

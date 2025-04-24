@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { Appariteur, Etudiant, Inscrits, Minerval, Promotion, PromotionResponse } from '@/types/api.types'
 import { Agent } from '@/types/api.types'
 import services from '@/services'
+import { se } from 'date-fns/locale'
 
 const { Appariteur: AppariteurService } = services
 interface UserState {
@@ -140,14 +141,17 @@ const useUserStore = create<UserState>()(
       },
       setActiveAppariteur: (appariteur) => set({ activeAppariteur: appariteur }),
       fetchPromotions: async (sectionId) => {
+        set({ isLoading: true })
         const response = await AppariteurService.getPromotionsBySectionId(sectionId)
         if (response) {
           const { data } = response
           set({ promotions: data })
-
+          set({ isLoading: false })
           return response
         } else {
+          set({ isLoading: false })
           throw new Error('Failed to fetch promotions')
+          
         }
       },
       clearToken: () => set({ token: null }),

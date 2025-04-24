@@ -23,10 +23,11 @@ export function Sidebar() {
 
 
   useEffect(()=>{
-    if (activeAppariteur === null) return;
     const fetchMenuItems = async () => {
-      const response = await fetchPromotions(activeAppariteur?.sectionId._id)
-      console.log('response from Sidebar', response);
+      if (activeAppariteur?.sectionId?._id) {
+        const response = await fetchPromotions(activeAppariteur.sectionId._id)
+        console.log('response from Sidebar', response);
+      }
     }
 
     fetchMenuItems();

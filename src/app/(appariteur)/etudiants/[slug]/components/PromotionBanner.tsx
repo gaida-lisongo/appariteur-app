@@ -11,6 +11,7 @@ type PromotionBannerProps = {
   backgroundImage?: any; // Pour l'image de fond
   showFinancePanel: boolean;
   setShowFinancePanel: (show: boolean) => void;
+  etudiants?: any[] | null; // Liste des étudiants (facultatif)
 };
 
 const PromotionBanner = ({
@@ -18,6 +19,7 @@ const PromotionBanner = ({
   backgroundImage,
   showFinancePanel,
   setShowFinancePanel,
+  etudiants,
 }: PromotionBannerProps) => {   
   return (
     <div className="relative h-80 bg-gradient-to-r from-primary/80 to-primary">
@@ -44,7 +46,7 @@ const PromotionBanner = ({
           <div className="flex items-center mt-2">
             <Users className="h-5 w-5 text-white/80 mr-2" />
             <span className="text-white/90 font-medium">
-              {promotion.nombreInscrits || 0} étudiants
+              {etudiants && etudiants?.length || 0} étudiants
             </span>
           </div>
         </div>

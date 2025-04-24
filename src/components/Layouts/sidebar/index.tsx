@@ -26,7 +26,7 @@ export function Sidebar() {
     const fetchMenuItems = async () => {
       if (activeAppariteur?.sectionId?._id) {
         const response = await fetchPromotions(activeAppariteur.sectionId._id)
-        console.log('response from Sidebar', response);
+        // console.log('response from Sidebar', response);
       }
     }
 
@@ -41,6 +41,7 @@ export function Sidebar() {
       </aside>
     );
   }
+  
   return (
     <>
       {/* Mobile Overlay */}

@@ -243,20 +243,20 @@ export function EtudiantsTable({
     return `${nom.charAt(0)}${prenom.charAt(0)}`.toUpperCase();
   };
 
-  if (isLoading) {
-    return (
-      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <div className="flex justify-between items-center pb-4 border-b border-stroke dark:border-strokedark">
-          <h4 className="text-xl font-semibold text-black dark:text-white">
-            Liste des étudiants
-          </h4>
-        </div>
-        <div className="flex justify-center items-center py-10">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+  //       <div className="flex justify-between items-center pb-4 border-b border-stroke dark:border-strokedark">
+  //         <h4 className="text-xl font-semibold text-black dark:text-white">
+  //           Liste des étudiants
+  //         </h4>
+  //       </div>
+  //       <div className="flex justify-center items-center py-10">
+  //         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -468,10 +468,7 @@ export function EtudiantsTable({
                           const response = await fetchEtudiant(etudiant._id);
                           console.log("Response:", response);
                           if (response && response?._id) {
-                            setTimeout(() => {
-                              // Rediriger vers la page de l'étudiant
-                              window.location.href = `/etudiant/${etudiant._id}`;
-                            }, 3000);
+                            window.location.href = `/etudiant/${etudiant._id}`;
                           }
                           
                         }}

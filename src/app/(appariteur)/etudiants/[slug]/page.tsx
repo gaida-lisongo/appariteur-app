@@ -12,6 +12,16 @@ import TrancheModal, { TrancheInitiale, TrancheFormData } from "./components/Tra
 import CreateMinervalPanel from "./components/CreateMinervalPanel";
 import services from "@/services";
 
+// Mettre à jour le nombre d'inscrits
+interface Promotion {
+  _id: string;
+  niveau: string;
+  mention: string;
+  orientation?: string;
+  nombreInscrits?: number;
+  [key: string]: any; // for other potential properties
+}
+
 const PromotionPage = () => {
   const params = useParams();
   const slug = params?.slug as string;
@@ -74,24 +84,16 @@ const PromotionPage = () => {
         // Trouver la promotion par son ID
         const selectedPromotion = promotions?.find(p => p._id === promotionId);
         if (selectedPromotion) {
+          console.log("Promotion trouvée:", selectedPromotion);
           setPromotion(selectedPromotion);
 
           // Charger les étudiants de cette promotion
           const etudiantsData = await fetchEtudiants(selectedPromotion._id);
 
-          console.log("Étudiants de la promotion:", etudiantsData);
+          console.log("Étudiants de la promotion:", etudiantsData[0]);
           if (etudiantsData && etudiantsData.length > 0 && etudiantsData[0].inscrits) {
 
             setEtudiants(etudiantsData[0].inscrits);
-          }
-          // Mettre à jour le nombre d'inscrits
-          interface Promotion {
-            _id: string;
-            niveau: string;
-            mention: string;
-            orientation?: string;
-            nombreInscrits?: number;
-            [key: string]: any; // for other potential properties
           }
           // Si des frais existent déjà, les charger
           if (selectedPromotion) {
@@ -107,7 +109,7 @@ const PromotionPage = () => {
     if (promotionId) {
       loadData();
     }
-  }, [isLoading]);
+  }, [promotionId]);
 
   useEffect(() => {
     if (fraisAcad && fraisAcad.length > 0) {
@@ -282,13 +284,13 @@ const PromotionPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  //     </div>
+  //   );
+  // }
 
   if (!promotion) {
     return (
@@ -312,6 +314,7 @@ const PromotionPage = () => {
           setShowFinancePanel={(show) => {
             setShowFinancePanel(show);
           }}
+          etudiants={etudiants}
         />
 
         {/* Panneau de création ou configuration des frais académiques */}

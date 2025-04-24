@@ -28,13 +28,13 @@ export default function EtudiantLayout({
     return new Date(dateStr).toLocaleDateString('fr-FR');
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-5 flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-5 flex items-center justify-center h-64">
+  //       <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+  //     </div>
+  //   );
+  // }
 
   if (!etudiant) {
     return (

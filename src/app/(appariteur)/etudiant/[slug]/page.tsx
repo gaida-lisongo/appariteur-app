@@ -444,13 +444,13 @@ export default function EtudiantPage() {
   };
 
   // Affichage conditionnel pour chargement et erreurs
-  if (isLoading || loading) {
-    return (
-      <div className="p-5 flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  // if (isLoading || loading) {
+  //   return (
+  //     <div className="p-5 flex items-center justify-center h-64">
+  //       <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+  //     </div>
+  //   );
+  // }
 
   if (!etudiant) {
     return (

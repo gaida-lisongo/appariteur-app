@@ -31,7 +31,7 @@ export function Sidebar() {
     }
 
     fetchMenuItems();
-  }, [activeAppariteur])
+  }, [activeAppariteur, isLoading])
 
 
   if (activeAppariteur === null) {

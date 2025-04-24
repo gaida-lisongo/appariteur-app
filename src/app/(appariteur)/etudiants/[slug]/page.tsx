@@ -29,7 +29,7 @@ const PromotionPage = () => {
     _id: "",
     anneeAcad: "",
     montantTotal: 0,
-    devise: "USD",
+    devise: "FC",
     nombreTranches: 1,
     tranches: [{
       _id: "",
@@ -64,7 +64,7 @@ const PromotionPage = () => {
     }
 
     return setMinervals([]); // Nettoyage de l'état des minervals
-  }, []);
+  }, [isLoading]);
 
   // Récupérer les infos de la promotion
   useEffect(() => {
@@ -110,7 +110,7 @@ const PromotionPage = () => {
     if (promotionId) {
       loadData();
     }
-  }, [promotionId, promotions, fetchEtudiants, fetchMinervals]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (fraisAcad && fraisAcad.length > 0) {

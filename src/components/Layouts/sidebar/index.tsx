@@ -21,16 +21,9 @@ export function Sidebar() {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
   };
 
-  if (activeAppariteur === null) {
-    return (
-      <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
-        <div className="loader" />
-      </aside>
-    );
-  }
 
   useEffect(()=>{
-    console.log('activeAppariteur in sidebar', agent);
+    if (activeAppariteur === null) return;
     const fetchMenuItems = async () => {
       const response = await fetchPromotions(activeAppariteur?.sectionId._id)
       console.log('response', response);
@@ -40,6 +33,13 @@ export function Sidebar() {
   }, [promotions, activeAppariteur])
 
 
+  if (activeAppariteur === null) {
+    return (
+      <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
+        <div className="loader" />
+      </aside>
+    );
+  }
   return (
     <>
       {/* Mobile Overlay */}

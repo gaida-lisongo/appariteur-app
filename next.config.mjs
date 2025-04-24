@@ -28,6 +28,23 @@ const nextConfig = {
         port: ""
       }
     ]
+  },
+  // Ajouts recommandés pour la production
+  productionBrowserSourceMaps: false, // Désactive les source maps en production pour réduire la taille
+  poweredByHeader: false, // Supprime l'en-tête X-Powered-By pour une meilleure sécurité
+  
+  // Vous pouvez aussi ajouter les en-têtes CORS ici si nécessaire
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' }
+        ],
+      },
+    ];
   }
 };
 

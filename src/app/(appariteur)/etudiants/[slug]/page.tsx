@@ -64,14 +64,13 @@ const PromotionPage = () => {
     }
 
     return setMinervals([]); // Nettoyage de l'état des minervals
-  }, [isLoading]);
+  }, []);
 
   // Récupérer les infos de la promotion
   useEffect(() => {
 
     const loadData = async () => {
       try {
-        setLoading(true);
         // Trouver la promotion par son ID
         const selectedPromotion = promotions?.find(p => p._id === promotionId);
         if (selectedPromotion) {
@@ -102,9 +101,7 @@ const PromotionPage = () => {
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     if (promotionId) {
@@ -127,7 +124,7 @@ const PromotionPage = () => {
         }]
       }));
     }
-  }, [fraisAcad, minervals]);
+  }, [fraisAcad]);
 
   // Mise à jour du nombre de tranches
   useEffect(() => {

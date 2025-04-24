@@ -35,7 +35,7 @@ export function Sidebar() {
     }
 
     fetchMenuItems();
-  }, [isLoading])
+  }, [])
 
   if (isLoading) {
     return (
@@ -43,15 +43,6 @@ export function Sidebar() {
         <div className="loader" />
       </aside>
     );
-  }
-
-  if (!promotions) {
-    return (
-      <aside className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-dark">
-        <div className="loader" />
-      </aside>
-    );
-    
   }
 
   return (

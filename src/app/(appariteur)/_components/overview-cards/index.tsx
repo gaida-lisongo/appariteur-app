@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import services from "@/services";
 
 export function OverviewCardsGroup() {
-  const { promotions, activeAppariteur, fetchEtudiants, fetchMinervals } = useUserStore();
+  const { isLoading, promotions, activeAppariteur, fetchEtudiants, fetchMinervals } = useUserStore();
   const { Appariteur } = services;
 
   const [data, setData] = useState<{
@@ -166,10 +166,23 @@ export function OverviewCardsGroup() {
     fetchData();
     loadAllMetrics();
     
-  }, [promotions, Appariteur, fetchEtudiants]);
+  }, [promotions]);
 
   // Afficher un message de chargement ou rien en attendant les données
   if (!data && !metriques) return null;
+
+  if(isLoading) {
+    return (
+      //Loader
+      <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 2xl:gap-7.5">
+        <div className="loader" />
+        <div className="loader" />
+        <div className="loader" />
+        <div className="loader" />
+      </div>
+    );
+  }
+
   
   return (
     <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 2xl:gap-7.5">

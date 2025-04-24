@@ -93,7 +93,7 @@ export function StudentOverview({
       male: maleData,
       female: femaleData
     });
-  }, []);
+  }, [isLoading, promotions]);
 
   // Calculate totals
   const totalStudents = chartData.total.reduce((acc, { y }) => acc + y, 0);

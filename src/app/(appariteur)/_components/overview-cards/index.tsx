@@ -35,19 +35,15 @@ export function OverviewCardsGroup() {
           growthRate: 0,
           label: "Promotions"
         };
-        
-        try {
-          const responsePromotions = await Appariteur.getAllPromotions();
-          if (responsePromotions.success) {
-            const { count } = responsePromotions;
-            promotionsMetric = {
-              value: `${promotions?.length ?? 0}`,
-              growthRate: count > 0 ? parseFloat((((promotions?.length ?? 0) / count) * 100).toFixed(2)) : 0,
-              label: "Promotions"
-            };
-          }
-        } catch (error) {
-          console.error("Erreur lors de la récupération des promotions:", error);
+
+        const responsePromotions = await Appariteur.getAllPromotions();
+        if (responsePromotions.success) {
+          const { count } = responsePromotions;
+          promotionsMetric = {
+            value: `${promotions?.length ?? 0}`,
+            growthRate: count > 0 ? parseFloat((((promotions?.length ?? 0) / count) * 100).toFixed(2)) : 0,
+            label: "Promotions"
+          };
         }
         
         // 2. Obtenir les données des étudiants
@@ -57,43 +53,39 @@ export function OverviewCardsGroup() {
           label: "Étudiants"
         };
         
-        try {
-          if (promotions && promotions.length > 0) {
-            const promises = promotions.map(promotion => fetchEtudiants(promotion._id));
-            const studentsResults = await Promise.all(promises);
+        if (promotions && promotions.length > 0) {
+          const promises = promotions.map(promotion => fetchEtudiants(promotion._id));
+          const studentsResults = await Promise.all(promises);
 
-            let allStudentsResults : any[] = [];
+          let allStudentsResults : any[] = [];
 
-            studentsResults.forEach((result) => {
-              if (result) {
+          studentsResults.forEach((result) => {
+            if (result) {
 
-                allStudentsResults = [...allStudentsResults, ...result];
-              }
-            });
-            // Compter le nombre total d'étudiants en additionnant les longueurs des tableaux
-            const totalStudents = allStudentsResults.reduce((total, result) => {
-              // Vérifier si result.inscrits existe et est un tableau
-              return total + (result?.inscrits?.length || 0);
-            }, 0);
-
-            const responseEtudiants = await Appariteur.getAllEtudiants();
-            if (responseEtudiants.success) {
-              const { count } = responseEtudiants;
-              etudiantsMetric = {
-                value: `${totalStudents}`,
-                growthRate: count > 0 ? parseFloat((((totalStudents) / count) * 100).toFixed(2)) : 0,
-                label: "Étudiants"
-              };
+              allStudentsResults = [...allStudentsResults, ...result];
             }
-            
+          });
+          // Compter le nombre total d'étudiants en additionnant les longueurs des tableaux
+          const totalStudents = allStudentsResults.reduce((total, result) => {
+            // Vérifier si result.inscrits existe et est un tableau
+            return total + (result?.inscrits?.length || 0);
+          }, 0);
+
+          const responseEtudiants = await Appariteur.getAllEtudiants();
+          if (responseEtudiants.success) {
+            const { count } = responseEtudiants;
             etudiantsMetric = {
               value: `${totalStudents}`,
-              growthRate: promotions.length > 0 ? parseFloat((totalStudents / promotions.length).toFixed(2)) : 0,
+              growthRate: count > 0 ? parseFloat((((totalStudents) / count) * 100).toFixed(2)) : 0,
               label: "Étudiants"
             };
           }
-        } catch (error) {
-          console.error("Erreur lors de la récupération des étudiants:", error);
+          
+          etudiantsMetric = {
+            value: `${totalStudents}`,
+            growthRate: promotions.length > 0 ? parseFloat((totalStudents / promotions.length).toFixed(2)) : 0,
+            label: "Étudiants"
+          };
         }
         
         // 3. Placeholder pour les inscriptions (à implémenter selon votre logique)
@@ -167,7 +159,7 @@ export function OverviewCardsGroup() {
     fetchData();  
     loadAllMetrics();
     
-  }, []);
+  }, [isLoading]);
 
   if(data && isLoading) {
     return (

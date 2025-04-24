@@ -26,7 +26,7 @@ export function Sidebar() {
     if (activeAppariteur === null) return;
     const fetchMenuItems = async () => {
       const response = await fetchPromotions(activeAppariteur?.sectionId._id)
-      console.log('response', response);
+      console.log('response from Sidebar', response);
     }
 
     fetchMenuItems();

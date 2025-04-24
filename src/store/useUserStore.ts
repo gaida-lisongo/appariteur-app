@@ -20,7 +20,7 @@ interface UserState {
   setPromotion: (promotion: Promotion) => void
   setAgent: (agent: Agent) => void
   setToken: (token: string) => void
-  setEtudiants: (etudiants: Inscrits[]) => void
+  setEtudiants: (etudiants: Inscrits[] | null) => void
   fetchEtudiant: (etudiantId: string) => Promise<Etudiant | null>
   setMinervals: (minervals: Minerval[]) => void
   setEtudiant: (etudiant: Etudiant) => void
@@ -31,6 +31,10 @@ interface UserState {
   fetchPromotions: (sectionId: string) => Promise<PromotionResponse | null>
   clearToken: () => void
   clearActiveAppariteur: () => void
+  clearEtudiants: () => void
+  clearMinervals: () => void
+  clearPromotion: () => void
+  clearEtudiant: () => void
   clear: () => void
 }
 
@@ -156,6 +160,10 @@ const useUserStore = create<UserState>()(
       },
       clearToken: () => set({ token: null }),
       clearActiveAppariteur: () => set({ activeAppariteur: null }),
+      clearEtudiants: () => set({ etudiants: null }),
+      clearMinervals: () => set({ minervals: null }),
+      clearPromotion: () => set({ promotion: null }),
+      clearEtudiant: () => set({ etudiant: null }),
       clear: () => set({ token: null, activeAppariteur: null }),
     }),
     {

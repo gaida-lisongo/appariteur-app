@@ -37,7 +37,7 @@ type ImportedStudent = {
 
 export default function EtudiantsLayout({ children }: { children: React.ReactNode }) {
   const [formType, setFormType] = useState<"new" | "import" | null>(null);
-  const { etudiants, promotions, activeAppariteur, minervals } = useUserStore();
+  const { etudiants, promotions, activeAppariteur, minervals, clearEtudiants, clearMinervals, clearPromotion } = useUserStore();
   const [inscrits, setInscrits] = useState<any[] | []>([]);
   const [stats, setStats] = useState<{
     total: number;
@@ -74,6 +74,12 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
         setInscrits(allInscrits);
       });
     }
+
+    return () => {
+      clearEtudiants();
+      clearMinervals();
+      clearPromotion();
+    };
   }, [etudiants]);
 
   useEffect(() => {
@@ -506,7 +512,7 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
     }
   };
 
-  if (!inscrits) {
+  if (!stats) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

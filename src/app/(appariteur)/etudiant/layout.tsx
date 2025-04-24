@@ -14,13 +14,19 @@ export default function EtudiantLayout({
   children: React.ReactNode;
 }) {
   const { slug } = useParams();
-  const { etudiant, fetchEtudiant, isLoading } = useUserStore();
+  const { etudiant, fetchEtudiant, isLoading, clearEtudiant } = useUserStore();
 
   useEffect(() => {
     if (slug) {
       fetchEtudiant(slug as string);
     }
+
+    return () => {
+      clearEtudiant() // Réinitialiser l'étudiant lors du démontage du composant
+    };
   }, [slug, fetchEtudiant]);
+
+
 
   // Formater la date de naissance
   const formatDateNaissance = (dateStr?: string) => {

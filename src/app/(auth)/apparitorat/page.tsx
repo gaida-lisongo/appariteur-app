@@ -8,7 +8,7 @@ import services from "@/services";
 import { Appariteur } from "@/types/api.types";
 import AppariteurCard from "@/components/appariteur/AppariteurCard";
 import useUserStore from "@/store/useUserStore";
-import { inbtp, logo } from "@/assets/logo";
+import { inbtp } from "@/assets/logo";
 import { gt1 } from "@/assets/banner"
 
 export default function ApparitoratSelection() {

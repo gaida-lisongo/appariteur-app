@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import useUserStore from "@/store/useUserStore";
 import { inbtp } from "@/assets/logo";
+
 export default function EtudiantLayout({
   children,
 }: {
@@ -57,7 +58,7 @@ export default function EtudiantLayout({
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-2 dark:bg-meta-4 flex items-center justify-center">
               
               <Image 
-                src={inbtp} 
+                src={inbtp.src} 
                 alt={`${etudiant.infoPerso.nom} ${etudiant.infoPerso.postNom}`} 
                 width={96} 
                 height={96}

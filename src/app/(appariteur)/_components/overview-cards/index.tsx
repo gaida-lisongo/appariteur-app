@@ -155,7 +155,8 @@ export function OverviewCardsGroup() {
         console.error("Erreur lors du chargement des métriques:", error);
       }
     };
-    console.log("Appariteur", activeAppariteur);
+
+    console.log("Données de l'appariteur : ", activeAppariteur);
     // Charger les données de l'API d'overview (à garder si nécessaire)
     const fetchData = async () => {
       const response = await getOverviewData();
@@ -163,15 +164,12 @@ export function OverviewCardsGroup() {
     };
 
     // Exécuter les deux fonctions de chargement
-    fetchData();
+    fetchData();  
     loadAllMetrics();
     
-  }, [promotions]);
+  }, []);
 
-  // Afficher un message de chargement ou rien en attendant les données
-  if (!data && !metriques) return null;
-
-  if(isLoading) {
+  if(data && isLoading) {
     return (
       //Loader
       <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 2xl:gap-7.5">

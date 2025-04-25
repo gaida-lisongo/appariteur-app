@@ -37,7 +37,7 @@ type ImportedStudent = {
 
 export default function EtudiantsLayout({ children }: { children: React.ReactNode }) {
   const [formType, setFormType] = useState<"new" | "import" | null>(null);
-  const { etudiants, promotions, activeAppariteur, minervals, clearEtudiants, clearMinervals, clearPromotion } = useUserStore();
+  const { currentEtudiants: etudiants, promotions, activeAppariteur, minervals, isLoading} = useUserStore();
   const [inscrits, setInscrits] = useState<any[] | []>([]);
   const [stats, setStats] = useState<{
     total: number;
@@ -53,7 +53,6 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
   const [importFile, setImportFile] = useState<File | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [importResult, setImportResult] = useState<{
     success: number;
     error: number;
@@ -64,23 +63,16 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
   // Référence au champ de fichier pour le réinitialiser
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log('Current minervals:', minervals);
+  console.log('State loading:', isLoading);
+  console.log('Current Etudiants:', etudiants);
+  
   useEffect(() => {
     if (etudiants) {
-      etudiants.forEach((etudiant) => {
-        const allInscrits = etudiant.inscrits.map((inscrit: any) => {
-          return inscrit;
-        });
-
-        setInscrits(allInscrits);
-      });
+      setInscrits(etudiants.inscrits);
     }
-
-    return () => {
-      clearEtudiants();
-      clearMinervals();
-      clearPromotion();
-    };
-  }, [etudiants]);
+    console.log('Current etudiants:', etudiants);
+  }, [isLoading]);
 
   useEffect(() => {
     if (inscrits.length > 0) {
@@ -128,8 +120,6 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
   const handlePreviewImport = async () => {
     if (!importFile || !selectedPromotion || !selectedAnnee) return;
     
-    setIsLoading(true);
-
     try {
       // Parser le fichier CSV/Excel avec ExcelJS
       const data = await parseCsvExcel(importFile);
@@ -172,9 +162,7 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
     } catch (error) {
       console.error("Erreur lors de l'analyse du fichier:", error);
       alert("Erreur lors de l'analyse du fichier. Veuillez vérifier le format.");
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
 
   // Gestion des checkboxes pour sélectionner/désélectionner les étudiants
@@ -192,7 +180,7 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
       students.map(student => ({ ...student, isSelected: select }))
     );
   };
-
+ 
   // Modifier un étudiant dans la liste d'importation
   const handleUpdateStudent = (id: string, data: Partial<ImportedStudent>) => {
     setImportedStudents(students => 
@@ -512,13 +500,13 @@ export default function EtudiantsLayout({ children }: { children: React.ReactNod
     }
   };
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // if (!stats) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <>

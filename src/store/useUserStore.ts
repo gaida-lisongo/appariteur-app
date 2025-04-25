@@ -3,21 +3,25 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { Appariteur, Etudiant, Inscrits, Minerval, Promotion, PromotionResponse } from '@/types/api.types'
 import { Agent } from '@/types/api.types'
 import services from '@/services'
-import { se } from 'date-fns/locale'
+import { fi, se } from 'date-fns/locale'
 
 const { Appariteur: AppariteurService } = services
 interface UserState {
   token: string | null
+  slug: string | null
   activeAppariteur: Appariteur | null
   agent: Agent | null
   promotions: Promotion[] | null
   promotion: Promotion | null
   etudiants: Inscrits[] | null
+  currentEtudiants: Inscrits | null
   minervals: Minerval[] | null
   etudiant: Etudiant | null
   isLoading: boolean
+  setSlug: (slug: string) => void
+  setCurrentEtudiants: (etudiant: Inscrits) => void
   setLoading: (isLoading: boolean) => void
-  setPromotion: (promotion: Promotion) => void
+  setPromotion: (promotion: Promotion | null) => void
   setAgent: (agent: Agent) => void
   setToken: (token: string) => void
   setEtudiants: (etudiants: Inscrits[] | null) => void
@@ -47,18 +51,77 @@ const useUserStore = create<UserState>()(
       promotions: null,
       promotion: null,
       etudiants: null,
+      currentEtudiants: null,
       minervals: null,
       isLoading: false,
       etudiant: null,
+      slug: null,
       setEtudiant: (etudiant) => set({ etudiant }),
       setLoading: (isLoading) => set({ isLoading }),
       setEtudiants: (etudiants) => set({ etudiants }),
       setMinervals: (minervals) => set({ minervals }),
+      setCurrentEtudiants: (etudiant) => set({ currentEtudiants: etudiant }),
+      setSlug: async (slug) => {
+        set({ slug })
+
+        const [currentPromotionId, currentAnneeId] = slug.split('-');
+
+        // filter promotions by currentPromotionId from the store promotions        
+        
+        try {
+          set({ isLoading: true })
+          const promotions = useUserStore.getState().promotions || [];
+
+          if (promotions.length === 0) {
+            const response = await AppariteurService.getPromotionsBySectionId(currentPromotionId)
+            if (response.success) {
+              const { data } = response
+              set({ promotions: data })
+            } else {
+              set({ promotions: [] })
+            }
+          }
+
+          const filteredPromotions = promotions.filter((promotion) => promotion._id === currentPromotionId)
+
+          if (filteredPromotions.length > 0) {
+            const promotion = filteredPromotions[0]
+            const etudiants = useUserStore.getState().etudiants || []
+            console.log('Etudiants: ', etudiants);
+            console.log('Promotion: ', currentPromotionId);
+
+            const allEtudiants = etudiants.filter((etudiant) => etudiant.promotionId === currentPromotionId)
+            console.log('All Etudiants: ', allEtudiants);
+            const currentEtudiant = allEtudiants.length > 0 ? allEtudiants[0] : null;
+            set({ currentEtudiants: currentEtudiant })
+
+            // Get minervals by promotionId with fetchMinervals of store
+            const getMinervals = useUserStore.getState().fetchMinervals
+            await getMinervals(currentPromotionId)
+            
+            
+            set({ promotion })
+            set({ isLoading: false })
+          } else {
+            set({ promotion: null })
+            set({ isLoading: false })
+          }
+          
+          
+        } catch (error) {
+          console.error('Error fetching promotions:', error)
+          
+        } finally {
+          set({ isLoading: false })
+        }
+
+      },
       fetchEtudiant: async (etudiantId) => {
         const response = await AppariteurService.getEtudiantById({id: etudiantId})
         set({ isLoading: true })
         if (response.success) {
           const { data } = response
+          
           set({ etudiant: data, isLoading: false })
           return data
         } else {
@@ -75,6 +138,7 @@ const useUserStore = create<UserState>()(
                 const activeAppariteur = useUserStore.getState().activeAppariteur
                 const anneeId = activeAppariteur?.anneeId._id
                 const currentMinervals = data.filter((item) => item.anneeId._id === anneeId)
+                console.log('Information des minervals: ', currentMinervals);
                 
                 if (currentMinervals.length === 0) {
                     set({ isLoading: false })
@@ -99,6 +163,7 @@ const useUserStore = create<UserState>()(
       fetchEtudiants: async (promotionId) => {
         const response = await AppariteurService.getEtudiantsByPromotionId(promotionId)
         set({ isLoading: true })
+
         if (response.success) {
             const { data } = response;
             let inscrits = {

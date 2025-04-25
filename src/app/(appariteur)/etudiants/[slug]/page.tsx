@@ -11,6 +11,7 @@ import ConfigurationFraisPanel from "./components/ConfigurationFraisPanel";
 import TrancheModal, { TrancheInitiale, TrancheFormData } from "./components/TrancheModal";
 import CreateMinervalPanel from "./components/CreateMinervalPanel";
 import services from "@/services";
+import { min } from "date-fns";
 
 // Mettre à jour le nombre d'inscrits
 interface Promotion {
@@ -25,12 +26,10 @@ interface Promotion {
 const PromotionPage = () => {
   const params = useParams();
   const slug = params?.slug as string;
-  const { promotions, fetchEtudiants, isLoading, setLoading, minervals = {}, setMinervals, fetchMinervals } = useUserStore();
+  const { isLoading, minervals, promotion, currentEtudiants : etudiants, setSlug, setMinervals, clearEtudiants, clearMinervals, clearPromotion , setEtudiants } = useUserStore();
   const [promotionId, setPromotionId] = useState<string | null>(null);
   const [anneeId, setAnneeId] = useState<string | null>(null);
-  const [promotion, setPromotion] = useState<any>(null);
   const [showFinancePanel, setShowFinancePanel] = useState(false);
-  const [etudiants, setEtudiants] = useState<any[]>([]);
   const [fraisAcad, setFraisAcad] = useState<any>(null);
   const { Appariteur } = services;
   const [createFraisModalIsOpen, setCreateFraisModalIsOpen] = useState(false);
@@ -54,62 +53,34 @@ const PromotionPage = () => {
   const [trancheEnEdition, setTrancheEnEdition] = useState<TrancheInitiale | null>(null);
   const [trancheError, setTrancheError] = useState<string | null>(null);
 
-  const currentMinerval = async (promotionId: string) => {
-    const minervals = await fetchMinervals(promotionId);
-    if (minervals && minervals.length > 0) {
-      console.log("Minerval de la promotion:", minervals[0]);
-      setMinervals(minervals);
-    }
-  }
-
   useEffect(() => {
-    setLoading(true);
+    console.log("PromotionPage mounted, with slug:", slug);
     if (slug) {
       const [currentPromotion, currentAnnee] = slug.split("-");
       setPromotionId(currentPromotion);
       setAnneeId(currentAnnee);
-      setLoading(false);
-      
-      currentMinerval(currentPromotion);
+      setSlug(slug); // Mettre à jour le slug dans le store
     }
-
-    return setMinervals([]); // Nettoyage de l'état des minervals
-  }, []);
+    setTimeout(() => {
+      
+      console.log("Liste des étudiants:", etudiants);
+    
+    }, 1000);
+    // return () => {
+    //   setPromotionId(null);
+    //   setAnneeId(null);
+    //   clearEtudiants();
+    //   clearMinervals();
+    //   clearPromotion();
+    // };
+  }, [etudiants]);
 
   // Récupérer les infos de la promotion
   useEffect(() => {
-
-    const loadData = async () => {
-      try {
-        // Trouver la promotion par son ID
-        const selectedPromotion = promotions?.find(p => p._id === promotionId);
-        if (selectedPromotion) {
-          console.log("Promotion trouvée:", selectedPromotion);
-          setPromotion(selectedPromotion);
-
-          // Charger les étudiants de cette promotion
-          const etudiantsData = await fetchEtudiants(selectedPromotion._id);
-
-          console.log("Étudiants de la promotion:", etudiantsData[0]);
-          if (etudiantsData && etudiantsData.length > 0 && etudiantsData[0].inscrits) {
-
-            setEtudiants(etudiantsData[0].inscrits);
-          }
-          // Si des frais existent déjà, les charger
-          if (selectedPromotion) {
-            const allFraisAcademique = await fetchMinervals(selectedPromotion._id);
-            setFraisAcad(allFraisAcademique[0]);
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-      } 
-    };
-
-    if (promotionId) {
-      loadData();
+    if (minervals) {
+      setFraisAcad(minervals[0]);
     }
-  }, [promotionId]);
+  }, [minervals]);
 
   useEffect(() => {
     if (fraisAcad && fraisAcad.length > 0) {
@@ -235,7 +206,7 @@ const PromotionPage = () => {
         const response = await Appariteur.deleteEtudiant({ id });
         if (response.success) {
           alert(response.message);
-          setEtudiants(prev => prev.filter(e => e._id !== id));
+          window.location.reload();
         } else {
           console.error("Erreur lors de la suppression de l'étudiant:", response.message);
           alert("Une erreur est survenue lors de la suppression de l'étudiant.");
@@ -249,18 +220,7 @@ const PromotionPage = () => {
   };
 
   const refreshEtudiants = async () => {
-    try {
-      if (!promotionId) return;
-      setLoading(true);
-      const etudiantsData = await fetchEtudiants(promotionId);
-      if (etudiantsData && etudiantsData.length > 0 && etudiantsData[0].inscrits) {
-        setEtudiants(etudiantsData[0].inscrits);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'actualisation des données:", error);
-    } finally {
-      setLoading(false);
-    }
+    window.location.reload();
   };
 
   const saveFraisAcademiques = async () => {
@@ -314,7 +274,7 @@ const PromotionPage = () => {
           setShowFinancePanel={(show) => {
             setShowFinancePanel(show);
           }}
-          etudiants={etudiants}
+          etudiants={etudiants?.inscrits || []}
         />
 
         {/* Panneau de création ou configuration des frais académiques */}
@@ -348,9 +308,9 @@ const PromotionPage = () => {
       </div>
 
       {/* Tableau des étudiants */}
-      <div className="space-y-12">
+      {etudiants && (<div className="space-y-12">
         <EtudiantsTable
-          etudiants={etudiants}
+          etudiants={etudiants?.inscrits || []}
           promotionId={promotionId || ""}
           anneeId={anneeId || ""}
           onDelete={handleDeleteEtudiant}
@@ -358,7 +318,7 @@ const PromotionPage = () => {
           isLoading={isLoading}
           promotionInfo = {promotion}
         />
-      </div>
+      </div>)}
 
       {/* Modal pour ajouter ou éditer une tranche */}
       <TrancheModal

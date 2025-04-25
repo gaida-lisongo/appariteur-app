@@ -82,6 +82,7 @@ export function EtudiantsTable({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const { setEtudiants, fetchEtudiant, activeAppariteur } = useUserStore();
+  console.log("Promotion Info:", promotionInfo);
   // Filtrer les étudiants selon le terme de recherche
   const filteredEtudiants = etudiants.filter(
     (etudiant) =>

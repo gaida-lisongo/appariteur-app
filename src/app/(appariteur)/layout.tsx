@@ -1,16 +1,17 @@
+"use client";
 import { Sidebar } from "@/components/Layouts/sidebar";
 import { Header } from "@/components/Layouts/header";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s | NextAdmin - Next.js Dashboard Kit",
-    default: "NextAdmin - Next.js Dashboard Kit",
-  },
-    description:
-        "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.", 
-};
+// export const metadata: Metadata = {
+//   title: {
+//     template: "%s | NextAdmin - Next.js Dashboard Kit",
+//     default: "NextAdmin - Next.js Dashboard Kit",
+//   },
+//     description:
+//         "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.", 
+// };
 
 export default function AppariteurLayout({ children }: PropsWithChildren) {
   return (

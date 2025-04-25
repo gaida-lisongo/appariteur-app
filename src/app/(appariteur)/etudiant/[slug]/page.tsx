@@ -21,7 +21,7 @@ export default function EtudiantPage() {
   const { slug } = useParams();
   const { etudiant, isLoading, fetchEtudiant, promotions } = useUserStore();
   const { Appariteur } = services;
-  
+  console.log("Current etudiant: ", etudiant);  
   // État pour gérer les onglets
   const [activeTab, setActiveTab] = useState("personal");
   

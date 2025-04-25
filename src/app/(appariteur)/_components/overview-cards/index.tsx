@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import services from "@/services";
 
 export function OverviewCardsGroup() {
-  const { isLoading, promotions, activeAppariteur, fetchEtudiants, fetchMinervals } = useUserStore();
+  const { isLoading, promotions, activeAppariteur, fetchMinervals, etudiants } = useUserStore();
   const { Appariteur } = services;
 
   const [data, setData] = useState<{
@@ -53,16 +53,12 @@ export function OverviewCardsGroup() {
           label: "Étudiants"
         };
         
-        if (promotions && promotions.length > 0) {
-          const promises = promotions.map(promotion => fetchEtudiants(promotion._id));
-          const studentsResults = await Promise.all(promises);
-
+        if (etudiants && etudiants.length > 0) {
           let allStudentsResults : any[] = [];
 
-          studentsResults.forEach((result) => {
-            if (result) {
-
-              allStudentsResults = [...allStudentsResults, ...result];
+          etudiants.forEach((result) => {
+            if (result?.inscrits) {
+              allStudentsResults = [...allStudentsResults, ...result.inscrits];
             }
           });
           // Compter le nombre total d'étudiants en additionnant les longueurs des tableaux
@@ -83,7 +79,7 @@ export function OverviewCardsGroup() {
           
           etudiantsMetric = {
             value: `${totalStudents}`,
-            growthRate: promotions.length > 0 ? parseFloat((totalStudents / promotions.length).toFixed(2)) : 0,
+            growthRate: promotions && promotions.length > 0 ? parseFloat((totalStudents / promotions.length).toFixed(2)) : 0,
             label: "Étudiants"
           };
         }
@@ -148,7 +144,6 @@ export function OverviewCardsGroup() {
       }
     };
 
-    console.log("Données de l'appariteur : ", activeAppariteur);
     // Charger les données de l'API d'overview (à garder si nécessaire)
     const fetchData = async () => {
       const response = await getOverviewData();
@@ -161,7 +156,7 @@ export function OverviewCardsGroup() {
     
   }, [isLoading]);
 
-  if(data && isLoading) {
+  if(!metriques) {
     return (
       //Loader
       <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 2xl:gap-7.5">

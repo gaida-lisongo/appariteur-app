@@ -43,7 +43,7 @@ export function Header() {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2 min-[375px]:gap-4">
-        <div className="relative w-full max-w-[300px]">
+        {/* <div className="relative w-full max-w-[300px]">
           <input
             type="search"
             placeholder="Search"
@@ -51,11 +51,11 @@ export function Header() {
           />
 
           <SearchIcon className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 max-[1015px]:size-5" />
-        </div>
-
+        </div> */}
+{/* 
         <ThemeToggleSwitch />
 
-        <Notification />
+        <Notification /> */}
 
         <div className="shrink-0">
           <UserInfo />

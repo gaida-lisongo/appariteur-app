@@ -11,7 +11,7 @@ import services from "@/services";
 
 export default function SignIn() {
   const router = useRouter();
-  const { activeAppariteur, token, setToken, setAgent, makeTokenToCookie } = useUserStore();
+  const { activeAppariteur, token, setToken, setAgent, fetchPromotions, makeTokenToCookie } = useUserStore();
   const [matricule, setMatricule] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,7 @@ export default function SignIn() {
   // Redirection si déjà connecté
   useEffect(() => {
     if (token) {
-      router.push("/");
+      window.location.href = "/";
     }
   }, [token, router]);
 
@@ -83,7 +83,7 @@ export default function SignIn() {
         setToken(data.token);
         setAgent(data.agent);
         makeTokenToCookie(data.token);
-
+        fetchPromotions(activeAppariteur._id);
         // Rediriger vers le tableau de bord
         window.location.href = "/";
       } else {
